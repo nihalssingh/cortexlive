@@ -1,0 +1,61 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+
+# Raw data, feature caches, video and audio (licensed). Never commit these.
+data/
+cache/
+*.mkv
+*.mp4
+*.mov
+*.m4v
+*.webm
+*.avi
+*.mpg
+*.mpeg
+*.wmv
+*.flv
+*.ogv
+*.3gp
+*.mts
+*.m2ts
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.h5
+# the copy of the video that a viewer capture keeps
+runs/**/input.*
+
+# Per-parcel arrays are large. result.json IS committed.
+runs/**/*.npy
+runs/stream_gate/*.npz
+
+# nilearn downloads
+nilearn_data/
+
+# Reference code: a clone of TRIBE's repository (facebookresearch/algonauts-2025)
+refs/
+
+# Fitted head and reference data: rebuilt by 17_fit_final_head.py and
+# `cortexlive bundle --build-reference`, shipped as a model bundle
+models/
+
+# Run outputs and model bundles
+captures/
+dist/
+*.tar.gz
+
+# Exported pages can embed recorded fMRI
+runs/live_demo/*/*.html
+
+# Capture records keep their summaries; only the demo capture keeps its predictions
+runs/live_demo/*/predictions.npz
+!runs/live_demo/friends_s06e01a/predictions.npz
+
+# Local settings
+.env

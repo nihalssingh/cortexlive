@@ -1,0 +1,183 @@
+{
+  "description": "Per-parcel test-retest reliability from twice-shown Movie10 stimuli.",
+  "ceiling_definition": "sqrt(reliability); the max r a perfect model could reach against single-run data.",
+  "caveat": "Measured on Movie10 (Life, Hidden Figures) and assumed to transfer to Friends. The dataset allows no alternative.",
+  "subjects": {
+    "sub-01": {
+      "n_pairs": 17,
+      "pairs": [
+        "figures01",
+        "figures02",
+        "figures03",
+        "figures04",
+        "figures05",
+        "figures06",
+        "figures07",
+        "figures08",
+        "figures09",
+        "figures10",
+        "figures11",
+        "figures12",
+        "life01",
+        "life02",
+        "life03",
+        "life04",
+        "life05"
+      ],
+      "n_reliable_parcels": 975,
+      "reliability_mean": 0.23294885456562042,
+      "reliability_median": 0.19690528512001038,
+      "ceiling_mean_over_reliable": 0.4655134975910187,
+      "reliability_per_network": {
+        "Visual": 0.38321590423583984,
+        "Somatomotor": 0.2025766223669052,
+        "Dorsal Attention": 0.31788310408592224,
+        "Salience / Ventral Attention": 0.17780257761478424,
+        "Limbic (cortical)": 0.06054073944687843,
+        "Frontoparietal Control": 0.17834489047527313,
+        "Default Mode": 0.21053408086299896
+      },
+      "ceiling_per_network": {
+        "Visual": 0.6042623519897461,
+        "Somatomotor": 0.4221334457397461,
+        "Dorsal Attention": 0.5565810203552246,
+        "Salience / Ventral Attention": 0.40963754057884216,
+        "Limbic (cortical)": 0.2632133364677429,
+        "Frontoparietal Control": 0.4149383306503296,
+        "Default Mode": 0.45111969113349915
+      }
+    },
+    "sub-02": {
+      "n_pairs": 17,
+      "pairs": [
+        "figures01",
+        "figures02",
+        "figures03",
+        "figures04",
+        "figures05",
+        "figures06",
+        "figures07",
+        "figures08",
+        "figures09",
+        "figures10",
+        "figures11",
+        "figures12",
+        "life01",
+        "life02",
+        "life03",
+        "life04",
+        "life05"
+      ],
+      "n_reliable_parcels": 962,
+      "reliability_mean": 0.19830267131328583,
+      "reliability_median": 0.16827628016471863,
+      "ceiling_mean_over_reliable": 0.42747408151626587,
+      "reliability_per_network": {
+        "Visual": 0.3276672959327698,
+        "Somatomotor": 0.15272772312164307,
+        "Dorsal Attention": 0.2607491612434387,
+        "Salience / Ventral Attention": 0.14097465574741364,
+        "Limbic (cortical)": 0.053449567407369614,
+        "Frontoparietal Control": 0.17708820104599,
+        "Default Mode": 0.1918429136276245
+      },
+      "ceiling_per_network": {
+        "Visual": 0.5547641515731812,
+        "Somatomotor": 0.36034277081489563,
+        "Dorsal Attention": 0.5009824633598328,
+        "Salience / Ventral Attention": 0.3619125783443451,
+        "Limbic (cortical)": 0.24886973202228546,
+        "Frontoparietal Control": 0.4199857711791992,
+        "Default Mode": 0.4261157512664795
+      }
+    },
+    "sub-03": {
+      "n_pairs": 17,
+      "pairs": [
+        "figures01",
+        "figures02",
+        "figures03",
+        "figures04",
+        "figures05",
+        "figures06",
+        "figures07",
+        "figures08",
+        "figures09",
+        "figures10",
+        "figures11",
+        "figures12",
+        "life01",
+        "life02",
+        "life03",
+        "life04",
+        "life05"
+      ],
+      "n_reliable_parcels": 991,
+      "reliability_mean": 0.23407785594463348,
+      "reliability_median": 0.19243517518043518,
+      "ceiling_mean_over_reliable": 0.46158528327941895,
+      "reliability_per_network": {
+        "Visual": 0.38330918550491333,
+        "Somatomotor": 0.18527653813362122,
+        "Dorsal Attention": 0.30339014530181885,
+        "Salience / Ventral Attention": 0.1708337664604187,
+        "Limbic (cortical)": 0.08487878739833832,
+        "Frontoparietal Control": 0.19401857256889343,
+        "Default Mode": 0.22751177847385406
+      },
+      "ceiling_per_network": {
+        "Visual": 0.605763852596283,
+        "Somatomotor": 0.3974343240261078,
+        "Dorsal Attention": 0.539699912071228,
+        "Salience / Ventral Attention": 0.39241114258766174,
+        "Limbic (cortical)": 0.29649627208709717,
+        "Frontoparietal Control": 0.43287181854248047,
+        "Default Mode": 0.4630925953388214
+      }
+    },
+    "sub-05": {
+      "n_pairs": 17,
+      "pairs": [
+        "figures01",
+        "figures02",
+        "figures03",
+        "figures04",
+        "figures05",
+        "figures06",
+        "figures07",
+        "figures08",
+        "figures09",
+        "figures10",
+        "figures11",
+        "figures12",
+        "life01",
+        "life02",
+        "life03",
+        "life04",
+        "life05"
+      ],
+      "n_reliable_parcels": 923,
+      "reliability_mean": 0.18074212968349457,
+      "reliability_median": 0.1574265956878662,
+      "ceiling_mean_over_reliable": 0.41809433698654175,
+      "reliability_per_network": {
+        "Visual": 0.2904142141342163,
+        "Somatomotor": 0.12067064642906189,
+        "Dorsal Attention": 0.24912342429161072,
+        "Salience / Ventral Attention": 0.12553538382053375,
+        "Limbic (cortical)": 0.05634208768606186,
+        "Frontoparietal Control": 0.16632218658924103,
+        "Default Mode": 0.1880471408367157
+      },
+      "ceiling_per_network": {
+        "Visual": 0.5250352621078491,
+        "Somatomotor": 0.35194236040115356,
+        "Dorsal Attention": 0.49291694164276123,
+        "Salience / Ventral Attention": 0.3469296097755432,
+        "Limbic (cortical)": 0.2502349019050598,
+        "Frontoparietal Control": 0.4081971347332001,
+        "Default Mode": 0.42018237709999084
+      }
+    }
+  }
+}

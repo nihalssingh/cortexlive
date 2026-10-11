@@ -1,0 +1,34 @@
+{
+  "modalities": [
+    "text",
+    "audio",
+    "video"
+  ],
+  "layers": {
+    "text": 8,
+    "audio": 15,
+    "video": 19
+  },
+  "n_components": 250,
+  "window": 5,
+  "note": "trained on 256px video features; runs live at 192px, which scores 1.5% lower on season 6 (runs/live_analysis/live_config.json)",
+  "per_subject": {
+    "sub-01": {
+      "alpha": 1000000.0,
+      "val_r": 0.2567356824874878
+    },
+    "sub-02": {
+      "alpha": 1000000.0,
+      "val_r": 0.26406195759773254
+    },
+    "sub-03": {
+      "alpha": 1000000.0,
+      "val_r": 0.2871056795120239
+    },
+    "sub-05": {
+      "alpha": 1000000.0,
+      "val_r": 0.2438036948442459
+    }
+  },
+  "mean_val_r": 0.26292675361037254
+}

@@ -1,0 +1,55 @@
+{
+  "modalities": [
+    "text",
+    "video"
+  ],
+  "layers": {
+    "text": 8,
+    "video": 19
+  },
+  "n_stimuli": 336,
+  "n_components": 250,
+  "design_width": 2500,
+  "epochs": 40,
+  "arms": {
+    "ridge": {
+      "per_subject": {
+        "sub-01": 0.24081042408943176,
+        "sub-02": 0.24843959510326385,
+        "sub-03": 0.27091118693351746,
+        "sub-05": 0.22768163681030273
+      },
+      "mean": 0.24696069955825806,
+      "normalized_mean": 0.552387250819377,
+      "normalized_per_network": {
+        "Visual": 0.6489845281811776,
+        "Somatomotor": 0.4817152752627417,
+        "Dorsal Attention": 0.5483243158850514,
+        "Salience / Ventral Attention": 0.5316466098297233,
+        "Limbic (cortical)": 0.3705563292159543,
+        "Frontoparietal Control": 0.5347600549998517,
+        "Default Mode": 0.5930379330847076
+      }
+    },
+    "joint": {
+      "per_subject": {
+        "sub-01": 0.2426292896270752,
+        "sub-02": 0.25004032254219055,
+        "sub-03": 0.2712012231349945,
+        "sub-05": 0.23068633675575256
+      },
+      "mean": 0.2486392855644226,
+      "normalized_mean": 0.5584001450332429,
+      "normalized_per_network": {
+        "Visual": 0.6408842376168863,
+        "Somatomotor": 0.4993767754664433,
+        "Dorsal Attention": 0.553168331898871,
+        "Salience / Ventral Attention": 0.5461463910058018,
+        "Limbic (cortical)": 0.37540453009684516,
+        "Frontoparietal Control": 0.5421711494159484,
+        "Default Mode": 0.5959765567322148
+      },
+      "params": 7714720
+    }
+  }
+}

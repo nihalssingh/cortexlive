@@ -1,0 +1,97 @@
+{
+  "capture": "runs/live_demo/friends_s06e01a",
+  "stimulus": "s06e01a",
+  "pace": "realtime",
+  "transcript": "CNeuroMod transcript",
+  "device": "mps",
+  "duration_s": 692.975,
+  "volumes": 466,
+  "expected_volumes": 466,
+  "bold_volumes": {
+    "sub-01": 465,
+    "sub-02": 465,
+    "sub-03": 465,
+    "sub-05": 465
+  },
+  "volumes_scored": 455,
+  "volumes_with_provisional_audio": 391,
+  "offline_reference": "cached features, same head, 192px video, CNeuroMod transcript",
+  "lag_s": {
+    "mean": 0.8969886302947998,
+    "p95": 1.8990110158920288,
+    "max": 3.5895779132843018,
+    "quarter_means": [
+      0.8194720149040222,
+      0.8879348039627075,
+      0.9464920163154602,
+      0.9348019957542419
+    ],
+    "linear_slope_per_volume": 0.0003180058823661298
+  },
+  "volumes_later_than_1_tr": 82,
+  "tick_ms": {
+    "mean": 224.1479034423828,
+    "p95": 540.5851440429688,
+    "max": 1029.3909912109375,
+    "quarter_means": [
+      218.0957794189453,
+      213.9726104736328,
+      239.1716766357422,
+      225.49142456054688
+    ],
+    "linear_slope_per_volume": 0.03432023958224972
+  },
+  "per_subject": {
+    "sub-01": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9841050874548762,
+      "pred_corr_min": 0.7771205070251707,
+      "r_live": 0.2956525683403015,
+      "r_offline": 0.29528912901878357,
+      "r_live_reliable": 0.3131283223628998,
+      "r_offline_reliable": 0.3124355673789978,
+      "pred_corr_mean_provisional_audio": 0.9815615530946371,
+      "pred_corr_mean_final_audio": 0.999644492686963
+    },
+    "sub-02": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9851989205467363,
+      "pred_corr_min": 0.7833407619855921,
+      "r_live": 0.2550372779369354,
+      "r_offline": 0.2527945637702942,
+      "r_live_reliable": 0.2849701941013336,
+      "r_offline_reliable": 0.2828949987888336,
+      "pred_corr_mean_provisional_audio": 0.9828314923298359,
+      "pred_corr_mean_final_audio": 0.9996624273093626
+    },
+    "sub-03": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.983378770040479,
+      "pred_corr_min": 0.8368848150265223,
+      "r_live": 0.27775633335113525,
+      "r_offline": 0.2739885747432709,
+      "r_live_reliable": 0.287069708108902,
+      "r_offline_reliable": 0.2829830050468445,
+      "pred_corr_mean_provisional_audio": 0.9807308756587994,
+      "pred_corr_mean_final_audio": 0.9995557497785528
+    },
+    "sub-05": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.982550518678339,
+      "pred_corr_min": 0.7750646207798236,
+      "r_live": 0.273890882730484,
+      "r_offline": 0.2736569941043854,
+      "r_live_reliable": 0.3088035583496094,
+      "r_offline_reliable": 0.3088506758213043,
+      "pred_corr_mean_provisional_audio": 0.9797545114794685,
+      "pred_corr_mean_final_audio": 0.9996323751589391
+    }
+  },
+  "mean": {
+    "pred_corr_mean": 0.9838083241801077,
+    "r_live": 0.27558426558971405,
+    "r_offline": 0.2739323154091835,
+    "r_live_reliable": 0.2984929457306862,
+    "r_offline_reliable": 0.29679106175899506
+  }
+}

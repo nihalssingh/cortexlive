@@ -1,0 +1,57 @@
+[project]
+name = "cortexlive"
+version = "0.1.0"
+description = "Predict human cortical responses to any video, in real time, on a laptop"
+# The code. The trained model is CC BY-NC 4.0 and the atlas files have their own
+# licenses: see NOTICE.
+license = "MIT"
+license-files = ["LICENSE", "NOTICE", "licenses/*"]
+authors = [{ name = "Nihal Sanjay Singh" }]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "h5py>=3.10",
+    "scipy>=1.12",
+    "nilearn>=0.10",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+]
+
+[project.urls]
+Repository = "https://github.com/nihalssingh/cortexlive"
+
+[project.scripts]
+cortexlive = "cortexlive.cli:main"
+
+[project.optional-dependencies]
+# Everything `cortexlive run` / `cortexlive view` need: the three backbones run locally.
+live = ["torch>=2.4", "transformers>=4.56", "huggingface-hub>=0.26"]
+# Head training on the laptop. Reads cached features only.
+train = ["torch>=2.4"]
+# Backbone extraction. Deliberately NOT a core dependency: if a training path ever
+# imports transformers, the cache has been bypassed and the run is invalid.
+extract = ["torch>=2.4", "transformers>=4.56", "huggingface-hub>=0.26"]
+dev = [
+    "ruff>=0.6",
+    "pytest>=8.0",
+]
+# Remote extraction on Modal. `modal run` executes the local entrypoint in whatever
+# Python invoked it, so it must be able to import cortexlive (and therefore h5py) --
+# run it as `uv run --extra remote modal run ...`, not from a standalone `modal` install.
+remote = ["modal>=0.64"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cortexlive"]

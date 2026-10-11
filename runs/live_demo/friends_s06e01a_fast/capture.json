@@ -1,0 +1,257 @@
+{
+  "format": "cortexlive-capture/1",
+  "created": "2026-10-07T00:30:53",
+  "input": {
+    "name": "friends_s06e01a.mkv",
+    "path": "data/algonauts/stimuli/movies/friends/s6/friends_s06e01a.mkv",
+    "duration_s": 692.975
+  },
+  "run": {
+    "pace": "fast",
+    "device": "mps",
+    "machine": {
+      "system": "Darwin 25.6.0",
+      "arch": "arm64",
+      "chip": "Apple M5",
+      "model": "Mac17,2",
+      "memory_gb": 24
+    },
+    "transcript": "CNeuroMod transcript",
+    "volumes": 466,
+    "expected_volumes": 466,
+    "stopped": false,
+    "wall_s": 477.74015712738037,
+    "realtime_factor": 1.4505270064941,
+    "first_volume_s": 21.511039972305298,
+    "lag_s": null,
+    "tick_ms": {
+      "mean": 1.4996110200881958,
+      "p95": 6.395459175109863,
+      "max": 49.712181091308594,
+      "quarter_means": [
+        1.4404741525650024,
+        1.4038840532302856,
+        1.4148377180099487,
+        1.740582823753357
+      ]
+    },
+    "notes": []
+  },
+  "model": {
+    "subjects": [
+      "sub-01",
+      "sub-02",
+      "sub-03",
+      "sub-05"
+    ],
+    "layers": {
+      "text": 8,
+      "audio": 15,
+      "video": 19
+    },
+    "window_tr": 5,
+    "tr_s": 1.49
+  },
+  "known": {
+    "stimulus": "s06e01a",
+    "source": "friends",
+    "split": "validation"
+  },
+  "scores": {
+    "stimulus": "s06e01a",
+    "split": "validation",
+    "protocol": "Pearson r per parcel over the predicted volumes of the trimmed timeline; mean over all 1000 parcels, or over reliable parcels (test-retest significant and noise ceiling >= 0.25); control = ridge on five transcript speech features",
+    "per_subject": {
+      "sub-01": {
+        "volumes_scored": 455,
+        "volumes_available": 455,
+        "r": 0.2952611744403839,
+        "r_reliable": 0.3123968839645386,
+        "control_r": 0.12374384701251984,
+        "control_r_reliable": 0.13127708435058594,
+        "reliable_parcels": 918,
+        "by_network": {
+          "Visual": {
+            "r": 0.3912971019744873,
+            "control_r": 0.13743342459201813,
+            "parcels": 161
+          },
+          "Somatomotor": {
+            "r": 0.24561069905757904,
+            "control_r": 0.1095418781042099,
+            "parcels": 185
+          },
+          "Dorsal Attention": {
+            "r": 0.3359895944595337,
+            "control_r": 0.1399579644203186,
+            "parcels": 121
+          },
+          "Salience / Ventral Attention": {
+            "r": 0.2708072066307068,
+            "control_r": 0.15619955956935883,
+            "parcels": 108
+          },
+          "Limbic (cortical)": {
+            "r": 0.2079378366470337,
+            "control_r": 0.08378657698631287,
+            "parcels": 23
+          },
+          "Frontoparietal Control": {
+            "r": 0.2788022458553314,
+            "control_r": 0.1070128083229065,
+            "parcels": 125
+          },
+          "Default Mode": {
+            "r": 0.3528653681278229,
+            "control_r": 0.14878040552139282,
+            "parcels": 195
+          }
+        }
+      },
+      "sub-02": {
+        "volumes_scored": 455,
+        "volumes_available": 455,
+        "r": 0.2527778148651123,
+        "r_reliable": 0.28288573026657104,
+        "control_r": 0.13346557319164276,
+        "control_r_reliable": 0.14752040803432465,
+        "reliable_parcels": 840,
+        "by_network": {
+          "Visual": {
+            "r": 0.39793092012405396,
+            "control_r": 0.18947462737560272,
+            "parcels": 158
+          },
+          "Somatomotor": {
+            "r": 0.24232839047908783,
+            "control_r": 0.14707618951797485,
+            "parcels": 134
+          },
+          "Dorsal Attention": {
+            "r": 0.2945195734500885,
+            "control_r": 0.15179811418056488,
+            "parcels": 119
+          },
+          "Salience / Ventral Attention": {
+            "r": 0.24711604416370392,
+            "control_r": 0.16086487472057343,
+            "parcels": 97
+          },
+          "Limbic (cortical)": {
+            "r": 0.1417413204908371,
+            "control_r": 0.07359427958726883,
+            "parcels": 17
+          },
+          "Frontoparietal Control": {
+            "r": 0.21799208223819733,
+            "control_r": 0.10677514225244522,
+            "parcels": 120
+          },
+          "Default Mode": {
+            "r": 0.2804727852344513,
+            "control_r": 0.13610227406024933,
+            "parcels": 195
+          }
+        }
+      },
+      "sub-03": {
+        "volumes_scored": 455,
+        "volumes_available": 455,
+        "r": 0.2742025852203369,
+        "r_reliable": 0.2832120358943939,
+        "control_r": 0.13162201642990112,
+        "control_r_reliable": 0.13708071410655975,
+        "reliable_parcels": 946,
+        "by_network": {
+          "Visual": {
+            "r": 0.3449168801307678,
+            "control_r": 0.1384606957435608,
+            "parcels": 162
+          },
+          "Somatomotor": {
+            "r": 0.27181944251060486,
+            "control_r": 0.13559868931770325,
+            "parcels": 183
+          },
+          "Dorsal Attention": {
+            "r": 0.30473509430885315,
+            "control_r": 0.13900429010391235,
+            "parcels": 121
+          },
+          "Salience / Ventral Attention": {
+            "r": 0.24515821039676666,
+            "control_r": 0.12386869639158249,
+            "parcels": 111
+          },
+          "Limbic (cortical)": {
+            "r": 0.18908169865608215,
+            "control_r": 0.09467078000307083,
+            "parcels": 34
+          },
+          "Frontoparietal Control": {
+            "r": 0.23337724804878235,
+            "control_r": 0.10861601680517197,
+            "parcels": 128
+          },
+          "Default Mode": {
+            "r": 0.29909422993659973,
+            "control_r": 0.1678384393453598,
+            "parcels": 207
+          }
+        }
+      },
+      "sub-05": {
+        "volumes_scored": 455,
+        "volumes_available": 455,
+        "r": 0.2736576199531555,
+        "r_reliable": 0.308896005153656,
+        "control_r": 0.12024938315153122,
+        "control_r_reliable": 0.1365741342306137,
+        "reliable_parcels": 802,
+        "by_network": {
+          "Visual": {
+            "r": 0.4061960279941559,
+            "control_r": 0.16565294563770294,
+            "parcels": 159
+          },
+          "Somatomotor": {
+            "r": 0.2962725758552551,
+            "control_r": 0.13320089876651764,
+            "parcels": 93
+          },
+          "Dorsal Attention": {
+            "r": 0.3004738986492157,
+            "control_r": 0.1081778034567833,
+            "parcels": 121
+          },
+          "Salience / Ventral Attention": {
+            "r": 0.2684870660305023,
+            "control_r": 0.13875392079353333,
+            "parcels": 90
+          },
+          "Limbic (cortical)": {
+            "r": 0.1462848037481308,
+            "control_r": 0.06685847043991089,
+            "parcels": 21
+          },
+          "Frontoparietal Control": {
+            "r": 0.2575763463973999,
+            "control_r": 0.11814871430397034,
+            "parcels": 119
+          },
+          "Default Mode": {
+            "r": 0.30829817056655884,
+            "control_r": 0.14957214891910553,
+            "parcels": 199
+          }
+        }
+      }
+    },
+    "mean": {
+      "r": 0.27397479861974716,
+      "r_reliable": 0.2968476638197899,
+      "control_r": 0.12727020494639874,
+      "control_r_reliable": 0.138113085180521
+    }
+  }
+}

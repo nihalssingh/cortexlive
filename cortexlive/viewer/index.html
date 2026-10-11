@@ -1,0 +1,750 @@
+<title>cortexlive</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%233987e5'/%3E%3C/svg%3E">
+<style>
+/* A dark viewing room: the video and the cortex side by side, readouts beneath.
+   Deliberately single-theme (dark), the convention for imaging viewers and video. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e;
+  --panel: #141619;
+  --raised: #1c1f23;
+  --line: #2a2e34;
+  --line-2: #3d434b;
+  --fg: #eceef1;
+  --fg-2: #a7aeb8;
+  --muted: #6e7681;
+  --accent: #3987e5;
+  --on: #22354f;
+  --on-line: #3c5c86;
+  --control: #8a929d;
+  --live: #e5484d;
+  --err: #ff8b8f;
+  --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --data: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --r: 10px;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 var(--ui); }
+button, input { font: inherit; color: inherit; }
+button { background: var(--raised); border: 1px solid var(--line); border-radius: 7px;
+         padding: 6px 11px; cursor: pointer; line-height: 1.2; }
+button:hover:not(:disabled) { border-color: var(--line-2); }
+button:focus-visible, input:focus-visible, label:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.on { background: var(--on); border-color: var(--on-line); }
+button:disabled { opacity: .4; cursor: default; }
+.app { max-width: 1280px; margin: 0 auto; padding-inline: 20px; padding-block: 14px 40px;
+       display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 600px) { .app { padding-inline: 16px; } }
+
+/* header */
+.bar { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; min-height: 40px; }
+.brand { font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.src { color: var(--fg-2); display: flex; gap: 8px; align-items: center; min-width: 0; flex: 1;
+       flex-wrap: wrap; }
+.src b { color: var(--fg); font-weight: 500; overflow-wrap: anywhere; }
+.tag { font: 500 11px/1 var(--data); color: var(--fg-2); border: 1px solid var(--line);
+       border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
+.chip { font: 600 11px/1 var(--data); letter-spacing: .08em; border-radius: 999px;
+        padding: 5px 9px; display: inline-flex; align-items: center; gap: 6px;
+        border: 1px solid var(--line); color: var(--fg-2); white-space: nowrap; }
+.chip.live { color: #fff; border-color: transparent; background: var(--live); }
+.chip.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+                     animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .chip.live::before { animation: none; } }
+.actions { display: flex; gap: 8px; }
+
+/* stage: video column (video, transport, controls) beside the cortex */
+.stage { display: grid; gap: 12px 16px; align-items: start;
+         grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+         grid-template-areas: "media brain" "transport brain" "status brain" "selectors brain";
+         grid-template-rows: auto auto auto 1fr; }
+@media (max-width: 860px) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto;
+           grid-template-areas: "media" "transport" "status" "brain" "selectors"; }
+}
+.media { grid-area: media; background: #000; border: 1px solid var(--line); border-radius: var(--r);
+         overflow: hidden; position: relative; aspect-ratio: 16 / 9; max-width: 100%;
+         display: grid; place-items: center; }
+video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.attach { position: absolute; }
+.brain { grid-area: brain; background: var(--panel); border: 1px solid var(--line);
+         border-radius: var(--r); overflow: hidden; }
+.brain canvas { display: block; width: 100%; height: auto; max-width: 100%; }
+.legend { display: flex; align-items: center; gap: 8px 10px; padding: 9px 12px;
+          border-top: 1px solid var(--line); font: 11px/1.2 var(--data); color: var(--fg-2);
+          flex-wrap: wrap; }
+.legend .ramp { flex: 1; min-width: 90px; height: 8px; border-radius: 4px; }
+.legend .name { color: var(--fg); font: 500 12px/1.2 var(--ui); }
+.legend .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+              margin-right: 5px; vertical-align: -1px; }
+
+.transport { grid-area: transport; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.transport input[type=range] { flex: 1; min-width: 140px; accent-color: var(--accent); }
+.tc { font: 12px/1 var(--data); color: var(--fg-2); font-variant-numeric: tabular-nums;
+      white-space: nowrap; }
+.status { grid-area: status; font: 12px/1.35 var(--data); color: var(--fg-2); min-height: 16px;
+          overflow-wrap: anywhere; }
+.status.err, .note { color: var(--err); }
+.note { font: 12px/1.35 var(--data); overflow-wrap: anywhere; }
+
+.selectors { grid-area: selectors; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lab { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; }
+.seg button { border-radius: 0; margin-left: -1px; }
+.seg button:first-child { border-radius: 7px 0 0 7px; margin-left: 0; }
+.seg button:last-child { border-radius: 0 7px 7px 0; }
+.seg button:only-child { border-radius: 7px; }
+
+/* readouts */
+.tiles { display: flex; flex-wrap: wrap; gap: 1px; background: var(--line); border: 1px solid var(--line);
+         border-radius: var(--r); overflow: hidden; }
+.tile { background: var(--panel); padding: 10px 14px; min-width: 0; flex: 1 1 170px; }
+.tile .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.tile .v { font-size: 21px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tile .v small { color: var(--muted); font-size: 15px; font-weight: 400; }
+.tile .n { font: 11px/1.3 var(--data); color: var(--fg-2); }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+         padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 8px 16px; flex-wrap: wrap; }
+.head h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+           color: var(--muted); font-weight: 600; }
+.mini { display: flex; align-items: center; gap: 8px; font: 11px/1 var(--data); color: var(--fg-2); }
+.mini .ramp { width: 96px; height: 8px; border-radius: 4px; }
+.heat { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0 12px; }
+.heat .labels { display: grid; grid-auto-rows: 20px; font-size: 12px; color: var(--fg-2); }
+.heat .labels div { display: flex; align-items: center; justify-content: flex-end; white-space: nowrap; }
+.heatwrap { min-width: 0; }
+.heatwrap canvas { display: block; width: 100%; cursor: crosshair; border-radius: 4px; }
+.axis { grid-column: 2; display: flex; justify-content: space-between; font: 11px/1 var(--data);
+        color: var(--muted); padding-top: 6px; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .heat .labels { font-size: 10.5px; } }
+.peaks { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.peaks button { font-size: 12px; padding: 4px 9px; }
+.peaks button span { font-family: var(--data); color: var(--fg-2); margin-left: 6px; }
+.tip { position: fixed; pointer-events: none; background: var(--raised); border: 1px solid var(--line-2);
+       border-radius: 6px; padding: 5px 8px; font: 12px/1.3 var(--data); color: var(--fg);
+       z-index: 10; white-space: nowrap; }
+
+.acc { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 7px 12px;
+       align-items: center; font-size: 12.5px; }
+.acc .name { color: var(--fg-2); text-align: right; white-space: nowrap; }
+.acc .track { position: relative; height: 18px; border-left: 1px solid var(--line-2); }
+.acc .bar-p { position: absolute; left: 0; top: 2px; height: 8px; border-radius: 0 4px 4px 0; background: var(--accent); }
+.acc .bar-c { position: absolute; left: 0; top: 12px; height: 4px; border-radius: 0 3px 3px 0; background: var(--control); }
+.acc .val { font: 12px/1 var(--data); font-variant-numeric: tabular-nums; color: var(--fg); text-align: right; white-space: nowrap; }
+.acc .val i { color: var(--muted); font-style: normal; margin-left: 4px; }
+.acc .ticks { grid-column: 2; position: relative; height: 12px; font: 11px/1 var(--data); color: var(--muted); }
+.acc .ticks span { position: absolute; transform: translateX(-50%); }
+.acc .ticks span:first-child { transform: none; }
+.key { display: flex; gap: 14px; font-size: 12px; color: var(--fg-2); flex-wrap: wrap; }
+.key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 600px) { .acc { grid-template-columns: max-content minmax(0, 1fr); }
+  .acc .val { grid-column: 2; text-align: left; margin-top: -4px; } .acc .ticks { display: none; } }
+
+/* idle */
+.idle { display: grid; gap: 14px; }
+.drop { border: 1.5px dashed var(--line-2); border-radius: 14px; padding: 64px 20px; text-align: center;
+        display: grid; gap: 8px; justify-items: center; background: var(--panel); cursor: pointer; }
+.drop.over { border-color: var(--accent); background: #13202f; }
+.drop .big { font-size: 21px; font-weight: 500; }
+.drop .small { color: var(--muted); font-size: 13px; }
+.list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line);
+        border-radius: var(--r); overflow: hidden; }
+.list button { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; text-align: left;
+               align-items: center; border: 0; border-radius: 0; background: var(--panel); padding: 11px 14px; }
+.list button:hover { background: var(--raised); }
+.list .t { overflow-wrap: anywhere; }
+.list .m { font: 12px/1.4 var(--data); color: var(--fg-2); white-space: nowrap; }
+@media (max-width: 600px) { .list button { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+footer { color: var(--muted); font-size: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
+.media .sound { position: absolute; left: 12px; bottom: 12px; z-index: 2; }
+.media .vnote { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 2; padding: 10px 12px;
+                border-radius: var(--r); background: rgba(20, 22, 25, .9); color: var(--fg-2);
+                font-size: 13px; line-height: 1.45; }
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">cortexlive</div>
+    <div class="src" id="src"></div>
+    <span class="chip" id="chip" hidden></span>
+    <div class="actions" id="actions">
+      <button id="openBtn" type="button">Open video</button>
+      <button id="libBtn" type="button">Captures</button>
+      <input type="file" id="fileIn" accept="video/*,.mkv" hidden>
+    </div>
+  </header>
+
+  <section class="idle" id="idle" hidden>
+    <div class="note" id="note" role="alert" hidden></div>
+    <label class="drop" id="drop" for="fileIn" tabindex="0">
+      <span class="big">Drop a video</span>
+      <span class="small">or click to choose one · predicted live on this machine</span>
+    </label>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="stage" id="stage" hidden>
+    <div class="media" id="media">
+      <video id="vid" playsinline preload="auto"></video>
+      <button class="attach" id="attachBtn" type="button" hidden>Attach the video</button>
+      <input type="file" id="attachIn" accept="video/*,.mkv" hidden>
+      <button class="sound" id="soundBtn" type="button" hidden>Turn on sound</button>
+      <div class="vnote" id="vnote" role="status" hidden></div>
+    </div>
+    <div class="transport">
+      <button id="playBtn" type="button">Play</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="Time">
+      <span class="tc" id="tc">00:00 / 00:00</span>
+      <button id="stopBtn" type="button" hidden>Stop</button>
+      <button id="rerunBtn" type="button" hidden>Run live again</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <div class="selectors">
+      <div class="group"><span class="lab">Participant</span><div class="seg" id="subs"></div></div>
+      <div class="group" id="streamGroup" hidden><span class="lab">Show</span><div class="seg" id="streams"></div></div>
+      <div class="group" id="mapGroup"><span class="lab">Map</span><div class="seg" id="maps"></div></div>
+    </div>
+    <div class="brain">
+      <canvas id="cv" role="img" aria-label="Cortical surface, four views"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="tiles" id="tiles" hidden></section>
+
+  <section class="panel" id="netPanel" hidden>
+    <div class="head"><h2>Networks over time</h2>
+      <div class="mini"><span>−1.5 SD</span><span class="ramp" id="heatRamp"></span><span>+1.5 SD</span></div></div>
+    <div class="heat">
+      <div class="labels" id="heatLabels"></div>
+      <div class="heatwrap" id="heatWrap"><canvas id="heat" aria-label="Mean predicted response per network over time"></canvas></div>
+      <div class="axis" id="heatAxis"></div>
+    </div>
+    <div class="peaks" id="peaksRow"><span class="lab">Peaks</span><span class="peaks" id="peaks"></span></div>
+  </section>
+
+  <section class="panel" id="accPanel" hidden>
+    <div class="head"><h2>Accuracy by network</h2>
+      <div class="key"><span><i style="background:var(--accent)"></i>Prediction</span><span><i style="background:var(--control)"></i>Speech-feature control</span><span>r · reliable parcels · this run</span></div></div>
+    <div class="acc" id="acc"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+<!--EMBED-->
+<script>
+"use strict";
+const EMBED = window.CORTEXLIVE_EMBED || null;
+const SERVER = !EMBED;
+const $ = id => document.getElementById(id);
+
+// ---------------------------------------------------------------- decoding
+const F16 = (() => { const t = new Float32Array(65536);
+  for (let h = 0; h < 65536; h++) { const s = h & 0x8000 ? -1 : 1, e = (h >> 10) & 31, f = h & 1023;
+    t[h] = e === 0 ? s * f * 2 ** -24 : e === 31 ? (f ? NaN : s * Infinity) : s * (1 + f / 1024) * 2 ** (e - 15); }
+  return t; })();
+function bytes(b64) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+const i8 = b => new Int8Array(bytes(b).buffer);
+const u8 = b => bytes(b);
+const i16 = b => new Int16Array(bytes(b).buffer);
+function f16(b) { const u = new Uint16Array(bytes(b).buffer), o = new Float32Array(u.length); for (let i = 0; i < u.length; i++) o[i] = F16[u[i]]; return o; }
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const fmtT = s => { s = Math.max(0, s); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`; };
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const r3 = x => x == null ? "—" : x.toFixed(3);
+
+// ---------------------------------------------------------------- colour
+// Diverging blue/red through a light neutral; sequential violet; greys carry no data.
+const C = { mid: [214, 217, 222], pos: [229, 72, 77], neg: [57, 135, 229], seq: [112, 86, 224],
+            none: [92, 97, 105], wall: [46, 49, 55], bg: [20, 22, 25], hmid: [40, 43, 48], track: [28, 31, 35] };
+const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const div = (t, mid = C.mid) => { t = clamp(t, -1, 1); return mix(mid, t >= 0 ? C.pos : C.neg, Math.abs(t)); };
+const seq = t => mix(C.mid, C.seq, clamp(t, 0, 1));
+const rgb = c => `rgb(${c.map(Math.round).join(",")})`;
+const divRamp = mid => `linear-gradient(90deg, ${rgb(div(-1, mid))}, ${rgb(div(0, mid))}, ${rgb(div(1, mid))})`;
+
+const MAPS = {
+  moment:   { label: "Moment",   tip: "Response at this moment, relative to each parcel's mean over the run (while live: over the run so far, starting from Friends season 6)", lo: "−2.5 SD", hi: "+2.5 SD" },
+  strength: { label: "Strength", tip: "How much each parcel's predicted response varied over the run, relative to Friends season 6", lo: "½×", hi: "2×" },
+  shift:    { label: "Shift",    tip: "Each parcel's mean predicted response over the run, relative to Friends season 6", lo: "−1 SD", hi: "+1 SD" },
+  accuracy: { label: "Accuracy", tip: "Correlation of the prediction with the recorded fMRI over this run", lo: "0", hi: "0.6 r", seq: true },
+  gain:     { label: "Gain",     tip: "Accuracy minus the speech-feature control's accuracy", lo: "−0.3 r", hi: "+0.3 r" },
+};
+const STREAMS = { pred: "Prediction", measured: "Measured fMRI", control: "Control" };
+const DEVICES = { mps: "Apple GPU", cuda: "CUDA GPU", cpu: "CPU" };
+
+// ---------------------------------------------------------------- state
+const S = { atlas: null, cap: null, live: null, subj: null, stream: "pred", map: "moment", cur: 0,
+            mode: "idle", playing: false, es: null, videoURL: null, timer: null };
+const trOf = () => S.cap ? S.cap.tr : S.live ? S.live.tr : 1.49;
+
+// ---------------------------------------------------------------- atlas
+function loadAtlas(a) {
+  const R = a.res, views = a.view_names.map(v => ({ parcel: i16(a.parcel[v]), shade: u8(a.shade[v]) }));
+  let x0 = R, x1 = 0, y0 = R, y1 = 0;  // crop every view to the union of their extents
+  for (const v of views) for (let y = 0; y < R; y++) for (let x = 0; x < R; x++)
+    if (v.parcel[y * R + x] !== -1) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const pad = 8; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(R - 1, x1 + pad); y1 = Math.min(R - 1, y1 + pad);
+  return { res: R, views, crop: { x0, y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }, net: i16(a.network_index), names: a.network_names };
+}
+
+// ---------------------------------------------------------------- capture
+function loadCapture(p) {
+  const subs = p.meta.model.subjects, st = {}, masks = {};
+  for (const s of subs) {
+    const e = p.streams[s], o = { pred: i8(e.pred), maps: {} };
+    if (e.measured) o.measured = i8(e.measured);
+    if (e.control) o.control = i8(e.control);
+    for (const k in e.maps) o.maps[k] = f16(e.maps[k]);
+    st[s] = o; masks[s] = u8(p.masks[s]);
+  }
+  return { id: p.id, meta: p.meta, n: p.n_vol, tr: p.tr, scale: p.scale, trim: p.trim || [0, 0], covered: u8(p.covered),
+           streams: st, masks, subjects: subs, hasMedia: p.has_media, nets: {} };
+}
+function netIndex(mask) {
+  const A = S.atlas; return A.names.map((_, j) => { const r = []; for (let p = 0; p < 1000; p++) if (A.net[p] === j && mask[p]) r.push(p); return r; });
+}
+// network x time: mean z-score of the reliable parcels in each network
+function netSeries(cap, subj, key) {
+  const id = `${subj}/${key}`; if (cap.nets[id]) return cap.nets[id];
+  const src = cap.streams[subj][key], n = cap.n, idx = netIndex(cap.masks[subj]);
+  const has = key === "pred" ? s => cap.covered[s] && s >= cap.trim[0] : s => idx.some(ps => ps.some(p => src[s * 1000 + p] !== 0));
+  const out = idx.map(() => new Float32Array(n).fill(NaN));
+  for (let s = 0; s < n; s++) {
+    if (!has(s)) continue;
+    idx.forEach((ps, j) => { if (!ps.length) return; let sum = 0; for (const p of ps) sum += src[s * 1000 + p];
+      out[j][s] = sum / ps.length / 127 * cap.scale; });
+  }
+  return (cap.nets[id] = out);
+}
+
+// ---------------------------------------------------------------- brain canvas
+const cv = $("cv"), ctx = cv.getContext("2d");
+let img = null;
+function sizeCanvas() { const { w, h } = S.atlas.crop; cv.width = w * 2; cv.height = h * 2; img = ctx.createImageData(cv.width, cv.height); }
+// colour(p) -> rgb for parcel p, or null for "no data here"
+function paint(colour) {
+  const A = S.atlas, R = A.res, { x0, y0, w, h } = A.crop, d = img.data, W = cv.width;
+  const lut = new Array(1000); for (let p = 0; p < 1000; p++) lut[p] = colour(p);
+  A.views.forEach((v, i) => {
+    const ox = (i % 2) * w, oy = Math.floor(i / 2) * h;
+    for (let y = 0; y < h; y++) { let o = ((oy + y) * W + ox) * 4, q = (y0 + y) * R + x0;
+      for (let x = 0; x < w; x++, o += 4, q++) { const p = v.parcel[q];
+        if (p === -1) { d[o] = C.bg[0]; d[o + 1] = C.bg[1]; d[o + 2] = C.bg[2]; d[o + 3] = 255; continue; }
+        const c = p < 0 ? C.wall : (lut[p] || C.none), sh = v.shade[q] / 255;
+        d[o] = c[0] * sh; d[o + 1] = c[1] * sh; d[o + 2] = c[2] * sh; d[o + 3] = 255; } }
+  });
+  ctx.putImageData(img, 0, 0);
+}
+const ALL = new Uint8Array(1000).fill(1);
+function maskFor(s) { return (S.cap && S.cap.masks[s]) || (S.live && S.live.masks[s]) || ALL; }
+function drawBrain() {
+  if (!S.atlas) return;
+  const mask = maskFor(S.subj);
+  if (S.mode === "live") return drawLiveBrain();
+  const cap = S.cap; if (!cap) return paint(() => C.mid);
+  if (S.map === "moment") {
+    const src = cap.streams[S.subj][S.stream], s = S.cur, off = s * 1000;
+    if (s < cap.trim[0]) return paint(() => null);  // before the brain responds: left out, as in training
+    const has = src && (S.stream !== "pred" || cap.covered[s]);
+    if (!has) return paint(() => null);  // past the point where a stopped run ended
+    return paint(p => mask[p] ? div(src[off + p] / 127 * cap.scale / 2.5) : null);
+  }
+  const m = cap.streams[S.subj].maps[S.map]; if (!m) return paint(p => mask[p] ? C.mid : null);
+  const f = { strength: v => div(Math.log2(v)), shift: v => div(v), accuracy: v => seq(v / 0.6), gain: v => div(v / 0.3) }[S.map];
+  paint(p => !mask[p] || !isFinite(m[p]) ? null : f(m[p]));
+}
+function drawLegend() {
+  const m = MAPS[S.map], lead = leadVolumes();
+  if (S.mode === "live" && !S.live) { $("legend").innerHTML = ""; return; }  // models loading
+  if (S.map === "moment" && S.cur < lead) {
+    const at = fmtT(lead * trOf());
+    $("legend").innerHTML = `<span class="name" title="fMRI measures blood flow, which responds several seconds after what is seen and heard. As in training, the volumes before ${at} are left out.">Brain response starts at ${at}</span><span>fMRI lags the picture by several seconds</span>`;
+    return;
+  }
+  const ramp = m.seq ? `linear-gradient(90deg, ${rgb(seq(0))}, ${rgb(seq(1))})` : divRamp(C.mid);
+  const name = S.map === "moment" ? `${STREAMS[S.stream]} · ${fmtT(S.cur * trOf())}` : m.label;
+  $("legend").innerHTML = `<span class="name" title="${esc(m.tip)}">${name}</span><span>${m.lo}</span><span class="ramp" style="background:${ramp}"></span><span>${m.hi}</span>`
+    + `<span title="Parcels whose recorded fMRI is not reliable enough to compare against"><i class="sw" style="background:${rgb(C.none)}"></i>low reliability</span>`;
+}
+
+// ---------------------------------------------------------------- live
+function startLive(d) {
+  const tr = d.tr || 1.49, n = Math.floor(Math.max(0, (d.duration || 0) - 1e-9) / tr) + 1, masks = {}, ref = {};
+  for (const s of d.subjects) if (d.masks && d.masks[s]) masks[s] = u8(d.masks[s]);
+  for (const s of d.subjects) if (d.stats && d.stats[s]) ref[s] = { mean: f16(d.stats[s].mean), sd: f16(d.stats[s].sd) };
+  S.live = { n, tr, duration: d.duration || 0, trim: d.trim || [0, 0], latest: -1, subjects: d.subjects, masks, ref, data: {}, stats: {}, lags: [], nets: {}, idx: {}, ready: {} };
+  for (const s of d.subjects) { S.live.stats[s] = { n: 0, mean: new Float64Array(1000), m2: new Float64Array(1000) }; S.live.data[s] = []; }
+}
+// Live colours compare each moment with the run so far. Until the run has statistics of its
+// own, each parcel's mean and SD over Friends season 6 stand in, weighted as PRIOR volumes;
+// without them the page waits for 4 volumes.
+const PRIOR = 8;
+const liveReady = (L, s) => L.stats[s].n >= (L.ref[s] ? 1 : 4);
+function liveZ(L, s, p, x) {
+  const st = L.stats[s], r = L.ref[s];
+  if (!r) return (x - st.mean[p]) / (Math.sqrt(st.m2[p] / (st.n - 1)) || 1);
+  const mu = (st.n * st.mean[p] + PRIOR * r.mean[p]) / (st.n + PRIOR);
+  return (x - mu) / (Math.sqrt((st.m2[p] + PRIOR * r.sd[p] * r.sd[p]) / (st.n - 1 + PRIOR)) || 1);
+}
+function netAt(L, s, k) {  // each network's mean z-score at volume k
+  const v = L.data[s][k]; if (!v) return;
+  L.idx[s].forEach((ps, j) => { if (!ps.length) return; let sum = 0;
+    for (const p of ps) sum += liveZ(L, s, p, v[p]);
+    L.nets[s][j][k] = sum / ps.length; });
+}
+function onVolume(ev) {
+  const L = S.live; if (!L) return;
+  for (const s of L.subjects) {
+    const u = new Uint16Array(bytes(ev.preds[s]).buffer), v = new Float32Array(1000);
+    for (let p = 0; p < 1000; p++) v[p] = F16[u[p]];
+    L.data[s][ev.s] = v;
+    const st = L.stats[s];  // running mean / variance per parcel (Welford), past the trimmed start
+    if (ev.s >= L.trim[0]) { st.n++; for (let p = 0; p < 1000; p++) { const dl = v[p] - st.mean[p]; st.mean[p] += dl / st.n; st.m2[p] += dl * (v[p] - st.mean[p]); } }
+    if (!L.nets[s]) { L.nets[s] = S.atlas.names.map(() => new Float32Array(L.n).fill(NaN)); L.idx[s] = netIndex(maskFor(s)); }
+    if (ev.s >= L.trim[0] && ev.s < L.n && liveReady(L, s)) {
+      if (!L.ready[s]) { L.ready[s] = true; for (let k = L.trim[0]; k < ev.s; k++) netAt(L, s, k); }  // columns that waited
+      netAt(L, s, ev.s);
+    }
+  }
+  L.latest = ev.s; L.lags.push(ev.lag);
+  S.cur = Math.min(ev.s, L.n - 1); drawLiveBrain(); drawLegend(); drawHeat(); updateTransport(); liveTiles();
+}
+function drawLiveBrain() {
+  const L = S.live, mask = maskFor(S.subj);
+  if (!L || L.latest < L.trim[0]) return paint(() => null);  // before the brain responds
+  if (!liveReady(L, S.subj)) return paint(p => mask[p] ? C.mid : null);
+  const v = L.data[S.subj][L.latest];
+  paint(p => mask[p] ? div(liveZ(L, S.subj, p, v[p]) / 2.5) : null);
+}
+
+// ---------------------------------------------------------------- networks over time
+const heat = $("heat"), hctx = heat.getContext("2d"), ROW = 20;
+function series() {
+  if (S.mode === "live") return S.live && S.live.nets[S.subj];
+  if (!S.cap) return null;
+  return netSeries(S.cap, S.subj, S.cap.streams[S.subj][S.stream] ? S.stream : "pred");
+}
+const nVol = () => S.mode === "live" ? (S.live ? S.live.n : 0) : (S.cap ? S.cap.n : 0);
+// volumes before the brain responds to the video: left out of training and scoring, and here
+const leadVolumes = () => (S.mode === "live" ? S.live && S.live.trim[0] : S.cap && S.cap.trim[0]) || 0;
+let HATCH = null;
+function hatch() {
+  if (HATCH) return HATCH;
+  const c = document.createElement("canvas"); c.width = c.height = 6;
+  const g = c.getContext("2d"); g.fillStyle = rgb(C.track); g.fillRect(0, 0, 6, 6);
+  g.strokeStyle = rgb(C.wall); g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, 6); g.lineTo(6, 0); g.stroke();
+  return (HATCH = hctx.createPattern(c, "repeat"));
+}
+function drawHeat() {
+  if (!S.atlas) return;
+  const ser = series(), n = nVol(), k = S.atlas.names.length;
+  const w = Math.max(120, $("heatWrap").clientWidth), dpr = window.devicePixelRatio || 1;
+  heat.width = Math.round(w * dpr); heat.height = k * ROW * dpr; heat.style.height = `${k * ROW}px`;
+  hctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  hctx.fillStyle = rgb(C.bg); hctx.fillRect(0, 0, w, k * ROW);
+  const end = Math.max(0, n - 1) * trOf();
+  $("heatAxis").innerHTML = n ? `<span>${fmtT(0)}</span><span>${fmtT(end / 2)}</span><span>${fmtT(end)}</span>` : "";
+  const lead = Math.min(n, leadVolumes()), band = () => { if (!lead) return; hctx.fillStyle = hatch();
+    for (let j = 0; j < k; j++) hctx.fillRect(0, j * ROW + 1, lead / n * w, ROW - 2); };
+  if (!ser || !n) return band();
+  const off = document.createElement("canvas"); off.width = n; off.height = k;
+  const oc = off.getContext("2d"), id = oc.createImageData(n, k);
+  for (let j = 0; j < k; j++) for (let s = 0; s < n; s++) { const v = ser[j][s], o = (j * n + s) * 4;
+    const c = isFinite(v) ? div(v / 1.5, C.hmid) : C.track; id.data[o] = c[0]; id.data[o + 1] = c[1]; id.data[o + 2] = c[2]; id.data[o + 3] = 255; }
+  oc.putImageData(id, 0, 0);
+  hctx.imageSmoothingEnabled = false;
+  for (let j = 0; j < k; j++) hctx.drawImage(off, 0, j, n, 1, 0, j * ROW + 1, w, ROW - 2);
+  band();
+  const x = (S.cur + 0.5) / n * w;
+  hctx.fillStyle = "#ffffff"; hctx.fillRect(Math.round(x) - 1, 0, 2, k * ROW);
+}
+function heatAt(e) {
+  const r = heat.getBoundingClientRect(), n = nVol(), k = S.atlas.names.length;
+  return { s: Math.floor(clamp((e.clientX - r.left) / r.width, 0, 0.9999) * n), j: Math.floor(clamp((e.clientY - r.top) / r.height, 0, 0.9999) * k) };
+}
+heat.addEventListener("pointerdown", e => { if (S.mode !== "review") return; heat.setPointerCapture(e.pointerId); seek(heatAt(e).s);
+  const mv = ev => seek(heatAt(ev).s), up = () => { heat.removeEventListener("pointermove", mv); heat.removeEventListener("pointerup", up); };
+  heat.addEventListener("pointermove", mv); heat.addEventListener("pointerup", up); });
+heat.addEventListener("mousemove", e => {
+  const ser = series(), tip = $("tip"); if (!ser || !nVol()) return;
+  const { s, j } = heatAt(e), v = ser[j][s], lead = leadVolumes();
+  tip.textContent = s < lead ? `${fmtT(s * trOf())} · before the brain responds (from ${fmtT(lead * trOf())})`
+    : `${S.atlas.names[j]} · ${fmtT(s * trOf())} · ${isFinite(v) ? (v >= 0 ? "+" : "") + v.toFixed(2) + " SD" : "—"}`;
+  tip.hidden = false; tip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tip.offsetWidth - 8)}px`; tip.style.top = `${e.clientY + 14}px`;
+});
+heat.addEventListener("mouseleave", () => { $("tip").hidden = true; });
+function drawPeaks() {
+  const ser = series(), n = nVol(), tr = trOf();
+  $("peaksRow").hidden = S.mode !== "review" || !ser;
+  if (!ser || S.mode !== "review") return;
+  $("peaks").innerHTML = S.atlas.names.map((name, j) => { let best = -1, bv = -Infinity;
+    for (let s = Math.max(1, S.cap.trim[0] + 1); s < n - 1 - S.cap.trim[1]; s++) { const a = ser[j][s - 1], b = ser[j][s], c = ser[j][s + 1];
+      if (isFinite(a) && isFinite(b) && isFinite(c)) { const m = (a + b + c) / 3; if (m > bv) { bv = m; best = s; } } }
+    return best < 0 ? "" : `<button type="button" data-s="${best}" title="Strongest moment for the ${esc(name)} network">${esc(name)}<span>${fmtT(best * tr)}</span></button>`; }).join("");
+}
+$("peaks").addEventListener("click", e => { const b = e.target.closest("button"); if (b && S.mode === "review") { if (S.map !== "moment") S.map = "moment"; refresh(); seek(+b.dataset.s); } });
+
+// ---------------------------------------------------------------- readouts
+const tile = (k, v, n) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="n">${n || "&nbsp;"}</div></div>`;
+function reviewTiles() {
+  const m = S.cap.meta, r = m.run, sc = m.scores;
+  const t = [tile("Volumes", `${r.volumes}<small> / ${r.expected_volumes}</small>`, r.stopped ? "stopped early" : `${fmtT(m.input.duration_s || 0)} of video`)];
+  if (r.pace === "realtime" && r.lag_s) t.push(tile("Lag", `${r.lag_s.mean.toFixed(2)} s`, `p95 ${r.lag_s.p95.toFixed(2)} s · max ${r.lag_s.max.toFixed(1)} s`));
+  if (r.pace === "fast" && r.realtime_factor) t.push(tile("Throughput", `${r.realtime_factor.toFixed(1)}×`, "real time"));
+  const p = sc && sc.per_subject && sc.per_subject[S.subj];
+  if (p) t.push(tile(`fMRI r · ${S.subj.replace("sub-", "S")}`, r3(p.r_reliable), `control ${r3(p.control_r_reliable)} · reliable parcels`));
+  $("tiles").innerHTML = t.join("");
+}
+function liveTiles() {
+  const L = S.live; if (!L) { $("tiles").innerHTML = ""; return; }
+  const lag = L.lags, mean = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length);
+  $("tiles").innerHTML = [tile("Volumes", `${L.latest + 1}<small> / ${L.n}</small>`, "computed so far"),
+    tile("Lag", lag.length ? `${lag[lag.length - 1].toFixed(2)} s` : "—", lag.length ? `mean ${mean(lag).toFixed(2)} s` : "")].join("");
+}
+function drawAcc() {
+  const sc = S.mode === "review" && S.cap.meta.scores, p = sc && sc.per_subject && sc.per_subject[S.subj];
+  $("accPanel").hidden = !p; if (!p) return;
+  const max = 0.6, w = x => x == null ? 0 : clamp(x / max, 0, 1) * 100;
+  $("acc").innerHTML = Object.entries(p.by_network).map(([n, v]) => `<span class="name">${esc(n)}</span><span class="track" title="${esc(n)} · ${v.parcels} reliable parcels"><span class="bar-p" style="width:${w(v.r)}%"></span><span class="bar-c" style="width:${w(v.control_r)}%"></span></span><span class="val">${r3(v.r)}<i>${r3(v.control_r)}</i></span>`).join("")
+    + `<span></span><span class="ticks">${[0, 0.2, 0.4, 0.6].map(t => `<span style="left:${t / max * 100}%">${t ? t.toFixed(1) : "0"}</span>`).join("")}</span><span></span>`;
+}
+
+// ---------------------------------------------------------------- controls
+function buildSelectors() {
+  const subs = S.cap ? S.cap.subjects : S.live ? S.live.subjects : [], review = S.mode === "review";
+  $("subs").innerHTML = subs.map(s => `<button type="button" data-s="${s}" class="${s === S.subj ? "on" : ""}">${s.replace("sub-", "S")}</button>`).join("");
+  const st = review && S.cap.streams[S.subj], avail = Object.keys(STREAMS).filter(k => st && st[k]);
+  $("streamGroup").hidden = avail.length < 2;
+  $("streams").innerHTML = avail.map(k => `<button type="button" data-k="${k}" class="${k === S.stream ? "on" : ""}">${STREAMS[k]}</button>`).join("");
+  const maps = Object.keys(MAPS).filter(k => k === "moment" || (st && st.maps[k]));
+  $("mapGroup").hidden = !review || maps.length < 2;
+  $("maps").innerHTML = maps.map(k => `<button type="button" data-k="${k}" title="${esc(MAPS[k].tip)}" class="${k === S.map ? "on" : ""}">${MAPS[k].label}</button>`).join("");
+}
+$("subs").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.subj = b.dataset.s;
+  if (S.cap) { const st = S.cap.streams[S.subj]; if (!st[S.stream]) S.stream = "pred"; if (S.map !== "moment" && !st.maps[S.map]) S.map = "moment"; }
+  refresh(); });
+$("streams").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.stream = b.dataset.k; S.map = "moment"; refresh(); });
+$("maps").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMap(b.dataset.k); });
+function setMap(k) { S.map = k; refresh(); }
+function refresh() {
+  buildSelectors(); drawBrain(); drawLegend(); drawHeat(); drawPeaks(); updateTransport();
+  if (S.mode === "review") { reviewTiles(); drawAcc(); } else { liveTiles(); $("accPanel").hidden = true; }
+}
+
+const vid = $("vid"), scrub = $("scrub");
+function updateTransport() {
+  const n = nVol(), live = S.mode === "live";
+  scrub.max = Math.max(0, n - 1); scrub.value = S.cur; scrub.disabled = live; $("playBtn").disabled = live;
+  const dur = live ? (S.live ? S.live.duration : 0) : S.cap ? (S.cap.meta.input.duration_s || Math.max(0, n - 1) * trOf()) : 0;
+  $("tc").textContent = `${fmtT(S.cur * trOf())} / ${fmtT(dur)}`;
+}
+function seek(s) {
+  if (S.mode !== "review") return;
+  S.cur = clamp(s, 0, nVol() - 1);
+  if (vid.getAttribute("src") && isFinite(vid.duration)) vid.currentTime = S.cur * trOf() + 0.01;
+  drawBrain(); drawLegend(); drawHeat(); updateTransport();
+}
+scrub.addEventListener("input", () => seek(+scrub.value));
+function setPlaying(on) {
+  S.playing = on; $("playBtn").textContent = on ? "Pause" : "Play";
+  clearInterval(S.timer); S.timer = null;
+  if (vid.getAttribute("src") && vid.readyState > 0) { if (on) { if (S.cur >= nVol() - 1) seek(0); vid.currentTime = S.cur * trOf(); vid.play().catch(() => {}); } else vid.pause(); }
+  else if (on) S.timer = setInterval(() => { if (S.cur >= nVol() - 1) return setPlaying(false); seek(S.cur + 1); }, trOf() * 1000);
+}
+$("playBtn").addEventListener("click", () => { if (S.mode !== "review") return;
+  if (!S.playing) { vid.muted = false; $("soundBtn").hidden = true; }  // a click: sound is allowed now
+  setPlaying(!S.playing); });
+vid.addEventListener("timeupdate", () => { if (S.mode !== "review" || !S.playing) return;
+  const s = clamp(Math.floor(vid.currentTime / trOf()), 0, nVol() - 1); if (s !== S.cur) { S.cur = s; drawBrain(); drawLegend(); drawHeat(); updateTransport(); } });
+vid.addEventListener("ended", () => { if (S.mode === "review") setPlaying(false); });
+document.addEventListener("keydown", e => {
+  if (S.mode !== "review" || e.target.closest("input, button, label")) return;
+  if (e.code === "Space") { e.preventDefault(); setPlaying(!S.playing); }
+  else if (e.code === "ArrowRight" || e.code === "ArrowLeft") { e.preventDefault(); seek(S.cur + (e.code === "ArrowRight" ? 1 : -1)); }
+});
+
+function setChip(kind) {
+  const c = $("chip"); c.hidden = !kind; c.className = "chip" + (kind === "live" ? " live" : "");
+  c.textContent = kind === "live" ? "LIVE" : kind === "replay" ? "RECORDED RUN" : "";
+}
+function setStatus(t, err) { const s = $("status"); s.textContent = t || ""; s.className = "status" + (err ? " err" : ""); }
+function setSource(name, meta) {
+  const k = meta && meta.known, r = meta && meta.run, tags = [];
+  if (r) { tags.push(r.pace === "realtime" ? "1× real time" : "fast");
+    const chip = r.machine && r.machine.chip; if (chip || r.device) tags.push(chip || DEVICES[r.device] || r.device); }
+  if (k) tags.push(`CNeuroMod ${k.stimulus}${k.split === "training" ? " · training data" : ""}`);
+  if (r && r.transcript && r.transcript !== "none") tags.push("transcript");
+  if (r && (r.notes || []).some(n => n.startsWith("transcript left out"))) tags.push("transcript left out");
+  if (r && (r.notes || []).some(n => n.startsWith("no audio"))) tags.push("no audio");
+  $("src").innerHTML = name ? `<b>${esc(name)}</b>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join("") : "";
+}
+function showStage(on) {
+  for (const id of ["stage", "tiles", "netPanel"]) $(id).hidden = !on;
+  if (!on) $("accPanel").hidden = true;
+  $("idle").hidden = on || !SERVER;
+  if (on) $("note").hidden = true;
+}
+// back to the start screen, optionally with a message (a failed or empty live run)
+function toIdle(message) {
+  stopStream(); setPlaying(false); vid.pause();
+  if (S.videoURL) { URL.revokeObjectURL(S.videoURL); S.videoURL = null; }
+  vid.removeAttribute("src"); vid.load(); vid.muted = false; $("soundBtn").hidden = true; $("vnote").hidden = true;
+  S.mode = "idle"; S.cap = null; S.live = null;
+  showStage(false); setChip(null); setSource("", null); setStatus("");
+  $("libBtn").disabled = false; $("openBtn").disabled = false; $("stopBtn").hidden = true;
+  $("note").textContent = message || ""; $("note").hidden = !message;
+  if (SERVER) history.replaceState(null, "", location.pathname);
+  loadList();
+}
+
+// ---------------------------------------------------------------- flows
+async function fetchCapture(id) {
+  const r = await fetch(`/api/captures/${encodeURIComponent(id)}`);
+  const j = await r.json(); if (!r.ok) throw new Error(j.error || "capture not found");
+  return loadCapture(j);
+}
+async function openCapture(id) {
+  try { review(await fetchCapture(id), `/api/captures/${encodeURIComponent(id)}/media`); setStatus(""); }
+  catch (e) { toIdle(`Could not open the capture: ${e.message}`); }
+}
+// media: a URL for the capture's video, "keep" (the video already loaded), or null
+function review(cap, media) {
+  stopStream(); S.mode = "review"; S.cap = cap; S.live = null;
+  if (!cap.subjects.includes(S.subj)) S.subj = cap.subjects[0];
+  if (!cap.streams[S.subj][S.stream]) S.stream = "pred";
+  if (S.map !== "moment" && !cap.streams[S.subj].maps[S.map]) S.map = "moment";
+  S.cur = 0; showStage(true); setChip("replay"); setSource(cap.meta.input.name, cap.meta);
+  $("stopBtn").hidden = true; $("rerunBtn").hidden = !SERVER || !cap.hasMedia;
+  $("libBtn").disabled = false; $("openBtn").disabled = false;
+  if (media !== "keep") {
+    if (S.videoURL) { URL.revokeObjectURL(S.videoURL); S.videoURL = null; }
+    vid.muted = false; $("soundBtn").hidden = true; $("vnote").hidden = true;  // a different video
+    if (media && cap.hasMedia) { if (vid.getAttribute("src") !== media) vid.src = media; }
+    else { vid.removeAttribute("src"); vid.load(); }
+  }
+  vid.controls = false; vid.pause(); setPlaying(false);
+  $("attachBtn").hidden = !!vid.getAttribute("src");
+  if (SERVER) history.replaceState(null, "", `#capture=${cap.id}`);
+  refresh(); if (vid.getAttribute("src") && vid.readyState > 0) vid.currentTime = 0;
+}
+function stopStream() { if (S.es) { S.es.close(); S.es = null; } }
+async function goLive({ file, rerun }) {
+  stopStream(); setPlaying(false);
+  S.mode = "live"; S.cap = null; S.live = null; S.cur = 0; S.map = "moment"; S.stream = "pred";
+  showStage(true); setChip("live"); setStatus("");
+  vid.muted = false; $("soundBtn").hidden = true; $("vnote").hidden = true;  // each run asks for sound again
+  $("stopBtn").hidden = false; $("rerunBtn").hidden = true; $("attachBtn").hidden = true;
+  $("libBtn").disabled = true; $("openBtn").disabled = true;
+  refresh();
+  let res;
+  try {
+    if (file) {
+      if (S.videoURL) URL.revokeObjectURL(S.videoURL);
+      S.videoURL = URL.createObjectURL(file); vid.src = S.videoURL; setSource(file.name, null); res = await upload(file);
+    } else {
+      setSource(rerun.name, null);
+      if (S.videoURL) { URL.revokeObjectURL(S.videoURL); S.videoURL = null; }
+      vid.removeAttribute("src");
+      const r = await fetch(`/api/captures/${encodeURIComponent(rerun.id)}/rerun`, { method: "POST" });
+      res = await r.json(); if (!r.ok) throw new Error(res.error || "could not start");
+      vid.src = `/api/captures/${encodeURIComponent(rerun.id)}/media`;
+    }
+  } catch (e) { return toIdle(e.message); }
+  vid.pause();
+  const es = new EventSource(`/api/live/${res.session}/events`); S.es = es;
+  es.addEventListener("status", e => setStatus(JSON.parse(e.data).text));
+  es.addEventListener("start", e => { const d = JSON.parse(e.data); startLive(d);
+    if (!d.subjects.includes(S.subj)) S.subj = d.subjects[0];
+    setStatus("Predicting…"); refresh();
+    try { vid.currentTime = 0; } catch {}
+    startPlayback(); });
+  es.addEventListener("volume", e => onVolume(JSON.parse(e.data)));
+  es.addEventListener("end", async e => { const d = JSON.parse(e.data); es.close(); S.es = null; vid.pause();
+    if (!d.capture) { const at = S.live ? `, at ${fmtT(S.live.trim[0] * S.live.tr)}` : "";
+      return toIdle(d.stopped ? `Stopped before the first prediction${at}` : `The video ended before the first prediction${at}`); }
+    try { const cap = await fetchCapture(d.capture); review(cap, file ? "keep" : `/api/captures/${encodeURIComponent(d.capture)}/media`);
+      setStatus(d.stopped ? "Stopped" : ""); }
+    catch (err) { toIdle(`Could not open the capture: ${err.message}`); } });
+  es.addEventListener("failed", e => { es.close(); S.es = null; toIdle(JSON.parse(e.data).message); });
+  es.onerror = () => { if (es.readyState === EventSource.CLOSED && S.mode === "live") toIdle("Connection to the model lost"); };
+}
+function upload(file) {
+  return new Promise((resolve, reject) => { const x = new XMLHttpRequest();
+    x.open("POST", "/api/live"); x.setRequestHeader("X-Filename", encodeURIComponent(file.name));
+    x.upload.onprogress = e => { if (e.lengthComputable) setStatus(`Sending to the model ${Math.round(e.loaded / e.total * 100)}%`); };
+    x.onload = () => { try { const j = JSON.parse(x.responseText); x.status === 200 ? resolve(j) : reject(new Error(j.error || "upload failed")); } catch { reject(new Error("upload failed")); } };
+    x.onerror = () => reject(new Error("The local model server is not reachable"));
+    x.send(file); });
+}
+// Play with sound when the browser allows it. A browser that only allows muted playback
+// (no click on the page yet) gets muted video and a button to turn the sound on.
+function startPlayback() {
+  vid.play().catch(err => {
+    if (err.name !== "NotAllowedError") return;  // an unplayable file: the error handler says so
+    vid.muted = true; $("soundBtn").hidden = false; vid.play().catch(() => {});
+  });
+}
+$("soundBtn").addEventListener("click", () => { vid.muted = false; $("soundBtn").hidden = true;
+  if (vid.paused && S.mode === "live") vid.play().catch(() => {}); });
+vid.addEventListener("error", () => { if (!vid.getAttribute("src")) return;
+  $("vnote").textContent = "This browser can't play this video file. The predictions still run."; $("vnote").hidden = false; });
+$("stopBtn").addEventListener("click", () => { $("stopBtn").disabled = true; fetch("/api/live/stop", { method: "POST" }).finally(() => { $("stopBtn").disabled = false; }); });
+$("rerunBtn").addEventListener("click", () => { if (S.cap) goLive({ rerun: { id: S.cap.id, name: S.cap.meta.input.name } }); });
+$("openBtn").addEventListener("click", () => $("fileIn").click());
+$("fileIn").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if (f) goLive({ file: f }); });
+$("drop").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("fileIn").click(); } });
+$("attachBtn").addEventListener("click", () => $("attachIn").click());
+$("attachIn").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  if (S.videoURL) URL.revokeObjectURL(S.videoURL); S.videoURL = URL.createObjectURL(f); vid.src = S.videoURL; $("attachBtn").hidden = true; $("vnote").hidden = true;
+  vid.addEventListener("loadedmetadata", () => { vid.currentTime = S.cur * trOf(); }, { once: true }); });
+$("libBtn").addEventListener("click", () => { if (S.mode !== "live") toIdle(""); });
+window.addEventListener("dragover", e => { e.preventDefault(); if (SERVER && S.mode !== "live") $("drop").classList.add("over"); });
+window.addEventListener("dragleave", e => { if (!e.relatedTarget) $("drop").classList.remove("over"); });
+window.addEventListener("drop", e => { e.preventDefault(); $("drop").classList.remove("over");
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (SERVER && f && S.mode !== "live") goLive({ file: f }); });
+async function loadList() {
+  if (!SERVER) return;
+  try { const items = await (await fetch("/api/captures")).json();
+    $("list").hidden = !items.length;
+    $("list").innerHTML = items.map(c => { const tags = [c.known ? `r ${r3(c.r)}` : "", c.stopped ? "stopped" : "", c.pace === "fast" ? "fast" : ""].filter(Boolean).join(" · ");
+      return `<button type="button" data-id="${esc(c.id)}"><span class="t">${esc(c.name)}</span><span class="m">${tags}</span><span class="m">${fmtT(c.duration_s || 0)} · ${esc(c.created.replace("T", " ").slice(0, 16))}</span></button>`; }).join("");
+  } catch { $("list").hidden = true; }
+}
+$("list").addEventListener("click", e => { const b = e.target.closest("button"); if (b) openCapture(b.dataset.id); });
+let resizeT = null;
+window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (S.mode !== "idle") drawHeat(); }, 100); });
+
+// ---------------------------------------------------------------- boot
+(async function boot() {
+  $("foot").innerHTML = "<span>Predicted fMRI (BOLD) for four CNeuroMod participants · Schaefer 1000 parcels · TR 1.49 s</span>";
+  $("heatRamp").style.background = divRamp(C.hmid);
+  if (EMBED) {
+    $("actions").hidden = true;
+    S.atlas = loadAtlas(EMBED.atlas); sizeCanvas();
+    $("heatLabels").innerHTML = S.atlas.names.map(n => `<div>${esc(n)}</div>`).join("");
+    S.subj = EMBED.capture.meta.model.subjects[0];
+    review(loadCapture(EMBED.capture), null);
+    return;
+  }
+  try { S.atlas = loadAtlas(await (await fetch("/api/atlas")).json()); sizeCanvas(); }
+  catch {  // opened as a file, or the viewer is not running: the model lives in that process
+    $("idle").hidden = false; $("drop").hidden = true; $("actions").hidden = true;
+    $("note").textContent = "This page needs the cortexlive viewer running on this Mac. To start it, "
+      + "double-click cortexlive.command, at the top of the repository folder next to README.md "
+      + "(or run .venv/bin/cortexlive view in that folder); it opens the page for you.";
+    $("note").hidden = false; return;
+  }
+  $("heatLabels").innerHTML = S.atlas.names.map(n => `<div>${esc(n)}</div>`).join("");
+  const m = location.hash.match(/capture=([^&]+)/);
+  if (m) return openCapture(decodeURIComponent(m[1]));
+  showStage(false); loadList();
+})();
+</script>

@@ -1,0 +1,78 @@
+{
+  "capture": "runs/live_demo/friends_s06e01a_fast",
+  "stimulus": "s06e01a",
+  "pace": "fast",
+  "transcript": "CNeuroMod transcript",
+  "device": "mps",
+  "duration_s": 692.975,
+  "volumes": 466,
+  "expected_volumes": 466,
+  "bold_volumes": {
+    "sub-01": 465,
+    "sub-02": 465,
+    "sub-03": 465,
+    "sub-05": 465
+  },
+  "volumes_scored": 455,
+  "volumes_with_provisional_audio": null,
+  "offline_reference": "cached features, same head, 192px video, CNeuroMod transcript",
+  "lag_s": null,
+  "volumes_later_than_1_tr": null,
+  "tick_ms": {
+    "mean": 1.4996110200881958,
+    "p95": 6.395459175109863,
+    "max": 49.712181091308594,
+    "quarter_means": [
+      1.4404741525650024,
+      1.4038840532302856,
+      1.4148377180099487,
+      1.740582823753357
+    ],
+    "linear_slope_per_volume": 0.0010018601110115216
+  },
+  "per_subject": {
+    "sub-01": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9999251133797923,
+      "pred_corr_min": 0.9935837957698179,
+      "r_live": 0.2952611744403839,
+      "r_offline": 0.29528912901878357,
+      "r_live_reliable": 0.3123968839645386,
+      "r_offline_reliable": 0.3124355673789978
+    },
+    "sub-02": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9999364564116859,
+      "pred_corr_min": 0.9945165445140486,
+      "r_live": 0.2527778148651123,
+      "r_offline": 0.2527945637702942,
+      "r_live_reliable": 0.28288573026657104,
+      "r_offline_reliable": 0.2828949987888336
+    },
+    "sub-03": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9999214294907359,
+      "pred_corr_min": 0.9940870378941218,
+      "r_live": 0.2742025852203369,
+      "r_offline": 0.2739885747432709,
+      "r_live_reliable": 0.2832120358943939,
+      "r_offline_reliable": 0.2829830050468445
+    },
+    "sub-05": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.999916299001313,
+      "pred_corr_min": 0.9955208115985753,
+      "r_live": 0.2736576199531555,
+      "r_offline": 0.2736569941043854,
+      "r_live_reliable": 0.308896005153656,
+      "r_offline_reliable": 0.3088506758213043
+    }
+  },
+  "mean": {
+    "pred_corr_mean": 0.9999248245708817,
+    "r_live": 0.27397479861974716,
+    "r_offline": 0.2739323154091835,
+    "r_live_reliable": 0.2968476638197899,
+    "r_offline_reliable": 0.29679106175899506
+  }
+}

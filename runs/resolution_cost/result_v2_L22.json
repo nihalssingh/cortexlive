@@ -1,0 +1,85 @@
+{
+  "layer": 22,
+  "suffix": "v2",
+  "note": "frozen = head fit on 256px train features; refit = head refit on the low-res features with a within-val episode split. The gap is recoverable damage.",
+  "crops": {
+    "256": {
+      "n_val": 50,
+      "frozen": {
+        "mean": 0.19348835945129395,
+        "per_subject": {
+          "sub-01": 0.1888604462146759,
+          "sub-02": 0.18516406416893005,
+          "sub-03": 0.21935376524925232,
+          "sub-05": 0.1805751621723175
+        },
+        "normalized_per_network": {
+          "Visual": 0.6139843093898193,
+          "Somatomotor": 0.3856289664577834,
+          "Dorsal Attention": 0.4542223102581061,
+          "Salience / Ventral Attention": 0.39620729053993364,
+          "Limbic (cortical)": 0.25143963243139705,
+          "Frontoparietal Control": 0.31969671447109194,
+          "Default Mode": 0.40168217205888285
+        }
+      },
+      "refit": {
+        "mean": 0.17161914706230164,
+        "per_subject": {
+          "sub-01": 0.1653473973274231,
+          "sub-02": 0.16668295860290527,
+          "sub-03": 0.19448916614055634,
+          "sub-05": 0.15995702147483826
+        },
+        "normalized_per_network": {
+          "Visual": 0.5699825846118691,
+          "Somatomotor": 0.3265934425823813,
+          "Dorsal Attention": 0.40058005592770507,
+          "Salience / Ventral Attention": 0.33480313503422027,
+          "Limbic (cortical)": 0.209151568488192,
+          "Frontoparietal Control": 0.26704567124625217,
+          "Default Mode": 0.3523920963961178
+        }
+      }
+    },
+    "192": {
+      "n_val": 50,
+      "frozen": {
+        "mean": 0.18278975784778595,
+        "per_subject": {
+          "sub-01": 0.1786929965019226,
+          "sub-02": 0.1747640073299408,
+          "sub-03": 0.20760415494441986,
+          "sub-05": 0.17009787261486053
+        },
+        "normalized_per_network": {
+          "Visual": 0.5734763839914475,
+          "Somatomotor": 0.36466720094744287,
+          "Dorsal Attention": 0.4282551353003402,
+          "Salience / Ventral Attention": 0.37435133651555735,
+          "Limbic (cortical)": 0.24327201981278548,
+          "Frontoparietal Control": 0.3045564564402174,
+          "Default Mode": 0.38450003602052046
+        }
+      },
+      "refit": {
+        "mean": 0.16877491772174835,
+        "per_subject": {
+          "sub-01": 0.16236069798469543,
+          "sub-02": 0.1622663289308548,
+          "sub-03": 0.19236770272254944,
+          "sub-05": 0.15810495615005493
+        },
+        "normalized_per_network": {
+          "Visual": 0.5618832399953663,
+          "Somatomotor": 0.31583424880412564,
+          "Dorsal Attention": 0.3954903550568174,
+          "Salience / Ventral Attention": 0.32745481202425053,
+          "Limbic (cortical)": 0.20345550916244973,
+          "Frontoparietal Control": 0.2639623194624903,
+          "Default Mode": 0.3472294115158324
+        }
+      }
+    }
+  }
+}

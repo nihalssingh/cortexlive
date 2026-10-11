@@ -1,0 +1,23 @@
+{
+  "episode": "s06e01a",
+  "duration_s": 692.975,
+  "n_ticks": 465,
+  "n_slots": 466,
+  "n_predicted": 463,
+  "misses_after_warmup": 0,
+  "lag_s": {
+    "mean": 1.4874123210291736,
+    "p95": 3.4998457908630574,
+    "max": 4.594023904800395
+  },
+  "tick_ms": {
+    "mean": 323.336310027748,
+    "p95": 633.7091922760006,
+    "max": 916.7821407318115
+  },
+  "budget_ms": 1490.0,
+  "first_half_mean_ms": 262.8150859783436,
+  "second_half_mean_ms": 383.5977863344512,
+  "sustained": true,
+  "note": "misses exclude the first 3 warm-up TRs (first 64-frame clip lands at 2.13s). Ticks time flush_partial+predict only; extractor forwards run in the media-feed path, which is why lag, not tick, is the end-to-end freshness measure."
+}

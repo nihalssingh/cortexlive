@@ -1,0 +1,75 @@
+{
+  "subject": "sub-01",
+  "layer": 8,
+  "modality": "text only",
+  "note": "Tests whether head SIZE matters on our data, rather than citing the Algonauts organizers' architecture-agnostic finding.",
+  "heads": {
+    "ridge": {
+      "params": 1251000,
+      "r": 0.17955216765403748,
+      "seconds": 2.2,
+      "normalized_per_network": {
+        "Visual": 0.34505544786835896,
+        "Somatomotor": 0.3157962880183741,
+        "Dorsal Attention": 0.3580369098631085,
+        "Salience / Ventral Attention": 0.39091972046989504,
+        "Limbic (cortical)": 0.290804004503621,
+        "Frontoparietal Control": 0.4335604457892189,
+        "Default Mode": 0.49733228058349793
+      }
+    },
+    "mlp-small": {
+      "params": 577768,
+      "hidden": [
+        256
+      ],
+      "r": 0.17637544870376587,
+      "seconds": 11.1,
+      "normalized_per_network": {
+        "Visual": 0.34939402792556784,
+        "Somatomotor": 0.30865679573766963,
+        "Dorsal Attention": 0.3498667840097771,
+        "Salience / Ventral Attention": 0.3752344637098959,
+        "Limbic (cortical)": 0.2932001802449425,
+        "Frontoparietal Control": 0.41706422537334203,
+        "Default Mode": 0.48747205283583667
+      }
+    },
+    "mlp-large": {
+      "params": 8815592,
+      "hidden": [
+        2048,
+        2048
+      ],
+      "r": 0.17682790756225586,
+      "seconds": 118.7,
+      "normalized_per_network": {
+        "Visual": 0.3468687313574332,
+        "Somatomotor": 0.31333077076784116,
+        "Dorsal Attention": 0.35238004866682116,
+        "Salience / Ventral Attention": 0.37987078195911345,
+        "Limbic (cortical)": 0.27857076589845947,
+        "Frontoparietal Control": 0.4200292010177938,
+        "Default Mode": 0.48991993534855727
+      }
+    },
+    "mlp-xl": {
+      "params": 85591016,
+      "hidden": [
+        8192,
+        8192
+      ],
+      "r": 0.17798428237438202,
+      "seconds": 1136.1,
+      "normalized_per_network": {
+        "Visual": 0.34363885407830463,
+        "Somatomotor": 0.31196457370347586,
+        "Dorsal Attention": 0.3528968673504767,
+        "Salience / Ventral Attention": 0.38648544668646184,
+        "Limbic (cortical)": 0.30044960329929987,
+        "Frontoparietal Control": 0.427141075795011,
+        "Default Mode": 0.4942494164152843
+      }
+    }
+  }
+}

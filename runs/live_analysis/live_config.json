@@ -1,0 +1,37 @@
+{
+  "protocol": "12_trimodal: per-subject Pearson over concatenated season-6 val runs, mean over 1000 parcels; normalized = mean r/ceiling (ceiling = sqrt of test-retest reliability) over parcels with significant reliability and ceiling > 0.1 (score.NoiseCeiling.normalize)",
+  "head": "models/final_head.npz, unchanged (no refit)",
+  "256px (training config)": {
+    "mean": 0.26292674988508224,
+    "normalized_mean": 0.590912979099101,
+    "per_subject": {
+      "sub-01": 0.2567356824874878,
+      "sub-02": 0.26406195759773254,
+      "sub-03": 0.2871056795120239,
+      "sub-05": 0.24380367994308472
+    },
+    "val_episodes": {
+      "sub-01": 50,
+      "sub-02": 50,
+      "sub-03": 49,
+      "sub-05": 50
+    }
+  },
+  "192px-v2 (live config)": {
+    "mean": 0.2589610144495964,
+    "normalized_mean": 0.5821967724398942,
+    "per_subject": {
+      "sub-01": 0.25330907106399536,
+      "sub-02": 0.2602987289428711,
+      "sub-03": 0.28226083517074585,
+      "sub-05": 0.23997542262077332
+    },
+    "val_episodes": {
+      "sub-01": 50,
+      "sub-02": 50,
+      "sub-03": 49,
+      "sub-05": 50
+    }
+  },
+  "relative_change": -0.01508304285212192
+}

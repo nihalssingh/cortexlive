@@ -1,0 +1,97 @@
+{
+  "capture": "runs/live_demo/friends_s06e01a_no-transcript",
+  "stimulus": "s06e01a",
+  "pace": "realtime",
+  "transcript": "none",
+  "device": "mps",
+  "duration_s": 692.975,
+  "volumes": 466,
+  "expected_volumes": 466,
+  "bold_volumes": {
+    "sub-01": 465,
+    "sub-02": 465,
+    "sub-03": 465,
+    "sub-05": 465
+  },
+  "volumes_scored": 455,
+  "volumes_with_provisional_audio": 395,
+  "offline_reference": "cached features, same head, 192px video, zero text rows (no transcript)",
+  "lag_s": {
+    "mean": 0.7980104088783264,
+    "p95": 1.7142369747161865,
+    "max": 3.6017611026763916,
+    "quarter_means": [
+      0.8193395137786865,
+      0.7849164605140686,
+      0.7986096143722534,
+      0.7891051173210144
+    ],
+    "linear_slope_per_volume": -0.00010919240716629811
+  },
+  "volumes_later_than_1_tr": 56,
+  "tick_ms": {
+    "mean": 222.75013732910156,
+    "p95": 499.21234130859375,
+    "max": 852.0376586914062,
+    "quarter_means": [
+      215.53997802734375,
+      208.051025390625,
+      233.7628631591797,
+      233.83546447753906
+    ],
+    "linear_slope_per_volume": 0.05821837128556641
+  },
+  "per_subject": {
+    "sub-01": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9778989865533266,
+      "pred_corr_min": 0.7448168859408291,
+      "r_live": 0.2741039991378784,
+      "r_offline": 0.27244317531585693,
+      "r_live_reliable": 0.2907550036907196,
+      "r_offline_reliable": 0.2885403037071228,
+      "pred_corr_mean_provisional_audio": 0.9746429067383159,
+      "pred_corr_mean_final_audio": 0.9993348453354821
+    },
+    "sub-02": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9763938267456315,
+      "pred_corr_min": 0.7417262686695039,
+      "r_live": 0.2297562211751938,
+      "r_offline": 0.2254440039396286,
+      "r_live_reliable": 0.25794827938079834,
+      "r_offline_reliable": 0.2535143792629242,
+      "pred_corr_mean_provisional_audio": 0.9729119941748986,
+      "pred_corr_mean_final_audio": 0.9993158911696219
+    },
+    "sub-03": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9768006529048932,
+      "pred_corr_min": 0.7989614784356773,
+      "r_live": 0.2589852809906006,
+      "r_offline": 0.2538760304450989,
+      "r_live_reliable": 0.26828330755233765,
+      "r_offline_reliable": 0.2627165913581848,
+      "pred_corr_mean_provisional_audio": 0.9733530848949057,
+      "pred_corr_mean_final_audio": 0.999497142303977
+    },
+    "sub-05": {
+      "volumes_scored": 455,
+      "pred_corr_mean": 0.9723867919294377,
+      "pred_corr_min": 0.6761756964757452,
+      "r_live": 0.26283901929855347,
+      "r_offline": 0.2609294354915619,
+      "r_live_reliable": 0.29516056180000305,
+      "r_offline_reliable": 0.2932160794734955,
+      "pred_corr_mean_provisional_audio": 0.9682875541079791,
+      "pred_corr_mean_final_audio": 0.9993734409207067
+    }
+  },
+  "mean": {
+    "pred_corr_mean": 0.9758700645333223,
+    "r_live": 0.25642113015055656,
+    "r_offline": 0.2531731612980366,
+    "r_live_reliable": 0.27803678810596466,
+    "r_offline_reliable": 0.2744968384504318
+  }
+}

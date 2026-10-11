@@ -1,0 +1,46 @@
+{
+  "modalities": {
+    "text": {
+      "cached": 336,
+      "usable": 336,
+      "missing": [],
+      "short": [],
+      "unreadable": [],
+      "delta_tr": {
+        "min": -2,
+        "median": -1.0,
+        "max": 6,
+        "within_tolerance": 335
+      }
+    },
+    "audio": {
+      "cached": 336,
+      "usable": 336,
+      "missing": [],
+      "short": [],
+      "unreadable": [],
+      "delta_tr": {
+        "min": -2,
+        "median": 0.0,
+        "max": 7,
+        "within_tolerance": 335
+      }
+    },
+    "video": {
+      "cached": 336,
+      "usable": 336,
+      "missing": [],
+      "short": [],
+      "unreadable": [],
+      "delta_tr": {
+        "min": -3,
+        "median": -1.0,
+        "max": 6,
+        "within_tolerance": 335
+      }
+    }
+  },
+  "problems": [],
+  "trimodal_usable": 336,
+  "clean": true
+}

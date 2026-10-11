@@ -1,0 +1,18 @@
+cortexlive run friends_s06e01a.mkv -> runs/live_demo/friends_s06e01a
+loading models ...
+recognised s06e01a (friends, validation split)
+transcript: CNeuroMod transcript
+volume 0 lag 3.59s
+volume 50 lag 0.23s
+volume 100 lag 0.51s
+volume 150 lag 0.23s
+volume 200 lag 0.81s
+volume 250 lag 0.45s
+volume 300 lag 0.82s
+volume 350 lag 0.63s
+volume 400 lag 1.17s
+volume 450 lag 0.99s
+scoring against the recorded fMRI ...
+466/466 volumes in 693.3s, lag 0.90s mean / 1.90s p95
+vs recorded fMRI (s06e01a): r 0.276 (control 0.127), reliable parcels r 0.298
+view: cortexlive view runs/live_demo/friends_s06e01a

@@ -1,0 +1,106 @@
+{
+  "stimuli": 336,
+  "train_stimuli": 286,
+  "pca_variance_kept": {
+    "text": 0.7338,
+    "audio": 0.867,
+    "video": 0.9471
+  },
+  "projection_max_rel_diff": 0.0,
+  "participants": {
+    "sub-01": {
+      "train_volumes": 136217,
+      "val_volumes": 22924,
+      "val_r_by_alpha": {
+        "1000": 0.2452,
+        "10000": 0.2477,
+        "100000": 0.25558,
+        "1e+06": 0.25674
+      },
+      "alpha": {
+        "refit": 1000000.0,
+        "shipped": 1000000.0
+      },
+      "val_r": {
+        "refit": 0.25674,
+        "shipped_weights": 0.25674,
+        "meta": 0.25674
+      },
+      "coef_correlation": 0.99999999,
+      "coef_max_rel_diff": 0.00027151443976259026,
+      "intercept_max_abs_diff": 2.155522697359566e-06
+    },
+    "sub-02": {
+      "train_volumes": 136217,
+      "val_volumes": 22924,
+      "val_r_by_alpha": {
+        "1000": 0.24624,
+        "10000": 0.24924,
+        "100000": 0.2592,
+        "1e+06": 0.26406
+      },
+      "alpha": {
+        "refit": 1000000.0,
+        "shipped": 1000000.0
+      },
+      "val_r": {
+        "refit": 0.26406,
+        "shipped_weights": 0.26406,
+        "meta": 0.26406
+      },
+      "coef_correlation": 0.99999999,
+      "coef_max_rel_diff": 0.0003065950945034161,
+      "intercept_max_abs_diff": 1.4381298371452488e-06
+    },
+    "sub-03": {
+      "train_volumes": 135771,
+      "val_volumes": 22495,
+      "val_r_by_alpha": {
+        "1000": 0.27272,
+        "10000": 0.27548,
+        "100000": 0.28455,
+        "1e+06": 0.28711
+      },
+      "alpha": {
+        "refit": 1000000.0,
+        "shipped": 1000000.0
+      },
+      "val_r": {
+        "refit": 0.28711,
+        "shipped_weights": 0.28711,
+        "meta": 0.28711
+      },
+      "coef_correlation": 0.99999999,
+      "coef_max_rel_diff": 0.00026408949896088683,
+      "intercept_max_abs_diff": 2.018901091280917e-06
+    },
+    "sub-05": {
+      "train_volumes": 134863,
+      "val_volumes": 22924,
+      "val_r_by_alpha": {
+        "1000": 0.2222,
+        "10000": 0.22524,
+        "100000": 0.23599,
+        "1e+06": 0.2438
+      },
+      "alpha": {
+        "refit": 1000000.0,
+        "shipped": 1000000.0
+      },
+      "val_r": {
+        "refit": 0.2438,
+        "shipped_weights": 0.2438,
+        "meta": 0.2438
+      },
+      "coef_correlation": 0.99999999,
+      "coef_max_rel_diff": 0.0003200917277334197,
+      "intercept_max_abs_diff": 1.2439109897156853e-06
+    }
+  },
+  "mean_val_r": {
+    "refit": 0.26293,
+    "meta": 0.26293
+  },
+  "note": "refit in float64 from the normal equations; the shipped head was solved by sklearn in float32, hence coef_max_rel_diff of a few 1e-4",
+  "seconds": 143
+}
