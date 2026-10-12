@@ -411,7 +411,7 @@ wheels = [
 
 [[package]]
 name = "cortexlive"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "h5py" },
@@ -463,7 +463,7 @@ requires-dist = [
     { name = "torch", marker = "extra == 'live'", specifier = ">=2.4" },
     { name = "torch", marker = "extra == 'train'", specifier = ">=2.4" },
     { name = "transformers", marker = "extra == 'extract'", specifier = ">=4.56" },
-    { name = "transformers", marker = "extra == 'live'", specifier = ">=4.56" },
+    { name = "transformers", marker = "extra == 'live'", specifier = ">=5.5" },
 ]
 provides-extras = ["live", "train", "extract", "dev", "remote"]
 

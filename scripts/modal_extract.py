@@ -188,7 +188,8 @@ def extract_batch(items: list[tuple[str, str]], modality: str, crop: int = CROP)
             x = torch.from_numpy(np.stack(buf)).to(device).permute(0, 3, 1, 2)
             x = x.half().div_(255.0).unsqueeze(0)
             buf = []
-            out = m(pixel_values_videos=x, output_hidden_states=True)
+            # the predictor is skipped: no encoder state depends on it
+            out = m(pixel_values_videos=x, output_hidden_states=True, skip_predictor=True)
             per_layer = [
                 h.view(1, h.shape[1] // grid, grid, hidden).mean(2).squeeze(0)
                 for h in out.hidden_states

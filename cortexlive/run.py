@@ -11,8 +11,8 @@ the paced mode of scripts/18_stream_gate.py:
     own time in the input) measures freshness.
   * fast pace: the same path, clocked by the media position instead of the wall clock,
     for batch runs. It waits for finalized audio instead of re-forwarding the partial
-    chunk, so its predictions reproduce the offline pipeline; lag means nothing there,
-    throughput does.
+    chunk, so its predictions nearly reproduce the offline pipeline (README, Results); lag
+    means nothing there, throughput does.
 
 A volume `s` is the predicted BOLD at time s * TR of the input. Because blood flow lags
 neural activity, it is predicted from what was on screen about 3-10 s earlier (a 5-TR
@@ -209,7 +209,7 @@ def run(enc: stream.LiveEncoder, *, path: str | Path, pace: str = "realtime",
             if s_next <= last:
                 tick = time.time()
                 # realtime: refresh the provisional partial audio chunk so the newest
-                # volumes exist; fast: wait for finalized chunks (offline parity).
+                # volumes exist; fast: wait for finalized chunks (near offline parity).
                 if fed != flushed_at and (pace == "realtime" or end):
                     enc.audio.flush_partial()
                     flushed_at = fed

@@ -18,7 +18,7 @@ NeuroMod (CNeuroMod) project. See [Credits and licenses](#credits-and-licenses).
 - [Homebrew](https://brew.sh), then `brew install uv ffmpeg`.
 - The trained model, `Llama-cortexlive-v0.1.0.tar.gz` (60 MB), attached to the
   [v0.1.0 release](https://github.com/nihalssingh/cortexlive/releases/tag/v0.1.0).
-  `cortexlive setup` downloads it and prints its SHA-256, which should be
+  `cortexlive setup` downloads it and checks that its SHA-256 is
   `abd6057678c1baba2d20443f96253b09546177265c68d6f2ebb994d89262211a`.
 - Optional: a Hugging Face account with access to
   [Llama 3.2 1B](https://huggingface.co/meta-llama/Llama-3.2-1B), which reads transcripts:
@@ -107,12 +107,14 @@ is used. Of the captures in `runs/live_demo/`, only `friends_s06e01a` keeps its
 ## Friends and Movie10
 
 With the CNeuroMod dataset in `data/algonauts` ([docs/data.md](docs/data.md)), the
-original Friends (seasons 1–6) and Movie10 files are recognised by name. Each run is
-scored against the participants' recorded fMRI, with accuracy by network next to a
-speech-feature control: a ridge on five measures of speech per volume, taken from the
-transcript (words, characters, speech or silence, seconds of speech and mean word
-duration), with no neural network. Seasons 1–5 and Movie10 were training data, so only
-season 6 scores are held out. With Llama 3.2 1B installed the run also reads the
+original Friends (seasons 1–6) and Movie10 files are recognised by name. Only the name is
+checked, and a file is aligned with the recording from its first frame: a clip of an
+episode's first minutes gets the right transcript and scores, a clip cut from later in it
+does not. Each run is scored against the participants' recorded fMRI, with accuracy by
+network next to a speech-feature control: a ridge on five measures of speech per volume,
+taken from the transcript (words, characters, speech or silence, seconds of speech and
+mean word duration), with no neural network. Seasons 1–5 and Movie10 were training data,
+so only season 6 scores are held out. With Llama 3.2 1B installed the run also reads the
 transcript. Other videos run without a transcript (there is no speech recognition): the
 text input is then what the model saw for silent stretches in training, which on Friends
 s06e01a costs 0.02 r ([Results](#results)). A capture of a recognised file also stores its
@@ -159,8 +161,12 @@ model bundle).
   descent. Its strength was chosen per participant on season 6 from 10³, 10⁴, 10⁵ and 10⁶;
   all four took 10⁶ (`runs/final_head/meta.json`). A finer sweep puts the best at
   5–7 × 10⁵, worth at most 0.0013 r (`runs/live_analysis/alpha.json`).
-- **Video resolution.** The ridge was fit on V-JEPA 2 features of 256 px clips; live runs
-  use 192 px, which scores 1.5% lower on season 6 (`runs/live_analysis/live_config.json`).
+- **Video frames.** Frames are taken at 30 per second, squashed to a square (the aspect
+  ratio is not kept) and given to V-JEPA 2 as RGB values divided by 255, in training and
+  live alike. V-JEPA 2's reference preprocessing instead crops the centre and normalizes
+  with the ImageNet mean and standard deviation; the effect of the difference has not been
+  measured. The ridge was fit on features of 256 px clips; live runs use 192 px, which
+  scores 1.5% lower on season 6 (`runs/live_analysis/live_config.json`).
 - **Why a ridge.** With the three backbones the model uses, neural-network readouts did
   no better. A network with a two-layer trunk shared by the four participants and a
   readout for each (9.0 M parameters) reached r = 0.261 on season 6, against the ridge's
@@ -189,7 +195,7 @@ per participant).
 |---|---|---|---|
 | Season 6, offline | r = 0.263 | | `runs/trimodal/text-audio-video.json` |
 | Season 6, offline, live configuration (192 px video) | r = 0.259 | | `runs/live_analysis/live_config.json` |
-| Friends s06e01a, live at 1x | r = 0.276 | r = 0.298 | `runs/live_demo/friends_s06e01a/capture.json` |
+| Friends s06e01a, live at 1x | r = 0.275 | r = 0.298 | `runs/live_demo/friends_s06e01a/capture.json` |
 | Friends s06e01a, offline, live configuration (192 px video), same volumes | r = 0.274 | r = 0.297 | `runs/live_analysis/capture_friends_s06e01a.json` |
 | Friends s06e01a, live at 1x, no transcript | r = 0.256 | r = 0.278 | `runs/live_demo/friends_s06e01a_no-transcript/capture.json` |
 | Speech-feature control, same volumes | r = 0.127 | r = 0.138 | `runs/live_demo/friends_s06e01a/capture.json` |
@@ -203,12 +209,12 @@ reaches r = 0.120 (`runs/control_baseline/result.json`).
 | Live run of Friends s06e01a at 1x | | record |
 |---|---|---|
 | Volumes predicted | 466 of 466 (the 5 before 0:07 are computed but not shown) | `runs/live_demo/friends_s06e01a/capture.json` |
-| Lag behind the video | 0.90 s mean, 1.90 s p95 | same |
-| Agreement with the offline pipeline (per-volume correlation across parcels) | 0.984, and 0.9999 with `--fast` | `runs/live_analysis/capture_friends_s06e01a.json`, `..._fast.json` |
-| `--fast` throughput | 1.45x real time | `runs/live_demo/friends_s06e01a_fast/capture.json` |
+| Lag behind the video | 0.48 s mean, 1.15 s p95 | same |
+| Agreement with the offline pipeline (per-volume correlation across parcels) | 0.983, and 0.9999 with `--fast` | `runs/live_analysis/capture_friends_s06e01a.json`, `..._fast.json` |
+| `--fast` throughput | 2.28x real time | `runs/live_demo/friends_s06e01a_fast/capture.json` |
 
 At 1x, the newest 30 s audio chunk is still incomplete when a volume is shown, so live
-agrees with offline at 0.984; `--fast` waits for complete chunks and agrees at 0.9999.
+agrees with offline at 0.983; `--fast` waits for complete chunks and agrees at 0.9999.
 Measured on a MacBook Pro with an Apple M5 and 24 GB of memory; timing varies with the
 machine and its load. As is known for language models, every backbone predicts the brain
 best from an intermediate layer (`runs/layer_sweep_all/`, `runs/av_layer_sweep/`).

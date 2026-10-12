@@ -323,6 +323,7 @@ class VideoStream:
 
     Exact parity with the cache: independent 64-frame clips, fp16, spatial mean over
     the 12x12 patch grid, model loaded with crop_size matching the input resolution.
+    V-JEPA2's predictor is skipped: only encoder states are read, and they do not depend on it.
     """
 
     def __init__(self, layer: int, device: str | None = None, crop: int = VIDEO_CROP):
@@ -360,7 +361,8 @@ class VideoStream:
         with torch.no_grad():
             x = torch.from_numpy(clip).to(self.device).permute(0, 3, 1, 2)
             x = x.half().div_(255.0).unsqueeze(0)
-            out = self.model(pixel_values_videos=x, output_hidden_states=True)
+            out = self.model(pixel_values_videos=x, output_hidden_states=True,
+                             skip_predictor=True)
             h = out.hidden_states[self.layer]
             feats = (
                 h.view(1, h.shape[1] // self.grid, self.grid, h.shape[-1])
@@ -494,8 +496,9 @@ class TextStream:
         # Keep one block PAST the readout layer: Llama applies its final RMSNorm to the
         # LAST hidden_states entry, so a model truncated exactly at `layer` returns a
         # normalized state where the cache (extracted from the full model) stored the
-        # raw interior one, a mismatch that lowers accuracy. w2v-bert and V-JEPA2 do
-        # not post-norm the appended state, so their streams truncate exactly.
+        # raw interior one, a mismatch that lowers accuracy. w2v-bert does not post-norm
+        # the appended state, nor does V-JEPA2 from transformers 5.4 on (pyproject.toml
+        # requires 5.5), so their streams truncate exactly.
         truncate(m, self.layer + 1)
         self.model = m.to(self.device).eval()
         self.tokenizer = AutoTokenizer.from_pretrained(TEXT_MODEL)

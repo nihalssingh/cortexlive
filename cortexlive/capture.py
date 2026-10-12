@@ -32,7 +32,9 @@ DEFAULT_ROOT = ROOT / "captures"
 
 
 def new_dir(root: Path, input_name: str) -> Path:
-    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", Path(input_name).stem).strip("-")[:60] or "input"
+    # a capture id must start with a letter or digit and hold no "..", or the viewer refuses it
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", Path(input_name).stem)
+    stem = re.sub(r"\.{2,}", ".", stem).strip("-._")[:60] or "input"
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     path = root / f"{stem}-{stamp}"
     n = 1
@@ -146,7 +148,8 @@ def load(path: Path) -> tuple[dict, dict[str, np.ndarray]]:
 
 
 def media_path(path: Path, meta: dict) -> Path | None:
-    """The capture's video: an uploaded copy inside it, else the original path."""
+    """The capture's video: an uploaded copy inside it, else the original path. The viewer
+    serves it only if it resolves to a video file."""
     for p in sorted(path.glob("input.*")):
         return p
     src = meta.get("input", {}).get("path")

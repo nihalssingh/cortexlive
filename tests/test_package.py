@@ -265,4 +265,7 @@ def test_setup_explains_a_file_that_is_not_a_bundle(tmp_path, capsys):
     page = tmp_path / "Llama-cortexlive-v0.1.0.tar.gz"
     page.write_text("<html>sign in</html>")  # e.g. a web page saved under the bundle's name
     assert cli._install_bundle(str(page)) == 1
+    assert "not the published bundle" in capsys.readouterr().err  # its digest gives it away
+    other = page.rename(tmp_path / "bundle.tar.gz")  # a name setup has no digest for
+    assert cli._install_bundle(str(other)) == 1
     assert "not a cortexlive model bundle" in capsys.readouterr().err

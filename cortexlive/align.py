@@ -58,8 +58,9 @@ def to_tr_grid(features: np.ndarray, n_tr: int) -> np.ndarray:
     every lookup off by a factor of three. Nothing raises: the model trains and scores
     badly, which looks like weak features. Convert first.
 
-    Each output row is the mean of the source frames whose centres fall inside that TR,
-    which is what the fMRI sample physically integrates over.
+    Each output row is the plain mean of every source frame that overlaps that TR (frame i
+    covers [i, i+1)), so a frame straddling a TR boundary counts toward both. That span
+    approximates what the fMRI sample integrates over.
     """
     n_src = features.shape[0]
     if n_src == n_tr:

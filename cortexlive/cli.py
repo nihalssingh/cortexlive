@@ -21,6 +21,7 @@ import sys
 import tarfile
 import threading
 import time
+import zlib
 from pathlib import Path
 
 from . import capture
@@ -36,6 +37,14 @@ BUNDLE_NOTICES = ("NOTICE", "licenses/MODEL_LICENSE.md",
 # The Llama 3.2 license asks that a model trained on Llama outputs carry "Llama" at the start
 # of its name; the head is fit on Llama 3.2 features.
 MODEL_NAME = "Llama-cortexlive"
+# The SHA-256 of each published bundle, by file name: setup refuses a file of one of these
+# names with another digest, before unpacking anything. A bundle of any other name installs
+# and prints its digest; one built with `cortexlive bundle` never matches, since the archive
+# records its build time. Pin each release here and in the README in the same commit.
+RELEASES = {
+    "Llama-cortexlive-v0.1.0.tar.gz":
+        "abd6057678c1baba2d20443f96253b09546177265c68d6f2ebb994d89262211a",
+}
 
 
 def _captures_root(args) -> Path:
@@ -288,19 +297,29 @@ def _install_bundle(src: str) -> int:
             print(f"no such bundle: {path}", file=sys.stderr)
             return 2
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        expected = RELEASES.get(path.name)
+        if expected and digest != expected:  # checked before anything is unpacked
+            print(f"{path.name} is not the published bundle of that name: its sha256 is "
+                  f"{digest}, not {expected}, so nothing was installed. Download it again "
+                  "(a bundle you built yourself needs another name).", file=sys.stderr)
+            return 1
         installed = []
         with tarfile.open(path) as tar:
+            members = {}
             for name in BUNDLE:  # only these files, whatever else the archive holds
                 try:
                     member = tar.getmember(name)
                 except KeyError:
                     continue
                 if member.isfile():
+                    members[name] = member
+            if {"models/final_head.npz", "runs/final_head/meta.json"} <= members.keys():
+                for name, member in members.items():  # nothing is written unless it is a bundle
                     dest = ROOT / name
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     dest.write_bytes(tar.extractfile(member).read())
                     installed.append(name)
-    except (OSError, tarfile.TarError) as e:  # a failed download, or not an archive
+    except (OSError, EOFError, zlib.error, tarfile.TarError) as e:  # failed, cut short, corrupt
         print(f"{src} is not a cortexlive model bundle, or could not be read: {e}",
               file=sys.stderr)
         return 1
@@ -310,7 +329,9 @@ def _install_bundle(src: str) -> int:
     if not {"models/final_head.npz", "runs/final_head/meta.json"} <= set(installed):
         print(f"{path.name} is not a cortexlive model bundle", file=sys.stderr)
         return 1
-    print(f"installed {', '.join(installed)}\nbundle sha256 {digest}\n"
+    match = next((n for n, d in RELEASES.items() if d == digest), None)  # a renamed copy too
+    note = f"verified: {match}" if match else "not a bundle this version knows, so not verified"
+    print(f"installed {', '.join(installed)}\nbundle sha256 {digest} ({note})\n"
           f"{MODEL_NAME}: CC BY-NC 4.0, built with Llama (licenses/MODEL_LICENSE.md)")
     return 0
 

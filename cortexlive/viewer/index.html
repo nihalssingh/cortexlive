@@ -496,11 +496,11 @@ $("peaks").addEventListener("click", e => { const b = e.target.closest("button")
 const tile = (k, v, n) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="n">${n || "&nbsp;"}</div></div>`;
 function reviewTiles() {
   const m = S.cap.meta, r = m.run, sc = m.scores;
-  const t = [tile("Volumes", `${r.volumes}<small> / ${r.expected_volumes}</small>`, r.stopped ? "stopped early" : `${fmtT(m.input.duration_s || 0)} of video`)];
+  const t = [tile("Volumes", `${esc(r.volumes)}<small> / ${esc(r.expected_volumes)}</small>`, r.stopped ? "stopped early" : `${fmtT(m.input.duration_s || 0)} of video`)];
   if (r.pace === "realtime" && r.lag_s) t.push(tile("Lag", `${r.lag_s.mean.toFixed(2)} s`, `p95 ${r.lag_s.p95.toFixed(2)} s · max ${r.lag_s.max.toFixed(1)} s`));
   if (r.pace === "fast" && r.realtime_factor) t.push(tile("Throughput", `${r.realtime_factor.toFixed(1)}×`, "real time"));
   const p = sc && sc.per_subject && sc.per_subject[S.subj];
-  if (p) t.push(tile(`fMRI r · ${S.subj.replace("sub-", "S")}`, r3(p.r_reliable), `control ${r3(p.control_r_reliable)} · reliable parcels`));
+  if (p) t.push(tile(`fMRI r · ${esc(S.subj.replace("sub-", "S"))}`, r3(p.r_reliable), `control ${r3(p.control_r_reliable)} · reliable parcels`));
   $("tiles").innerHTML = t.join("");
 }
 function liveTiles() {
@@ -513,14 +513,14 @@ function drawAcc() {
   const sc = S.mode === "review" && S.cap.meta.scores, p = sc && sc.per_subject && sc.per_subject[S.subj];
   $("accPanel").hidden = !p; if (!p) return;
   const max = 0.6, w = x => x == null ? 0 : clamp(x / max, 0, 1) * 100;
-  $("acc").innerHTML = Object.entries(p.by_network).map(([n, v]) => `<span class="name">${esc(n)}</span><span class="track" title="${esc(n)} · ${v.parcels} reliable parcels"><span class="bar-p" style="width:${w(v.r)}%"></span><span class="bar-c" style="width:${w(v.control_r)}%"></span></span><span class="val">${r3(v.r)}<i>${r3(v.control_r)}</i></span>`).join("")
+  $("acc").innerHTML = Object.entries(p.by_network).map(([n, v]) => `<span class="name">${esc(n)}</span><span class="track" title="${esc(n)} · ${esc(v.parcels)} reliable parcels"><span class="bar-p" style="width:${w(v.r)}%"></span><span class="bar-c" style="width:${w(v.control_r)}%"></span></span><span class="val">${r3(v.r)}<i>${r3(v.control_r)}</i></span>`).join("")
     + `<span></span><span class="ticks">${[0, 0.2, 0.4, 0.6].map(t => `<span style="left:${t / max * 100}%">${t ? t.toFixed(1) : "0"}</span>`).join("")}</span><span></span>`;
 }
 
 // ---------------------------------------------------------------- controls
 function buildSelectors() {
   const subs = S.cap ? S.cap.subjects : S.live ? S.live.subjects : [], review = S.mode === "review";
-  $("subs").innerHTML = subs.map(s => `<button type="button" data-s="${s}" class="${s === S.subj ? "on" : ""}">${s.replace("sub-", "S")}</button>`).join("");
+  $("subs").innerHTML = subs.map(s => `<button type="button" data-s="${esc(s)}" class="${s === S.subj ? "on" : ""}">${esc(s.replace("sub-", "S"))}</button>`).join("");
   const st = review && S.cap.streams[S.subj], avail = Object.keys(STREAMS).filter(k => st && st[k]);
   $("streamGroup").hidden = avail.length < 2;
   $("streams").innerHTML = avail.map(k => `<button type="button" data-k="${k}" class="${k === S.stream ? "on" : ""}">${STREAMS[k]}</button>`).join("");
@@ -632,7 +632,7 @@ function review(cap, media) {
   }
   vid.controls = false; vid.pause(); setPlaying(false);
   $("attachBtn").hidden = !!vid.getAttribute("src");
-  if (SERVER) history.replaceState(null, "", `#capture=${cap.id}`);
+  if (SERVER) history.replaceState(null, "", `#capture=${encodeURIComponent(cap.id)}`);
   refresh(); if (vid.getAttribute("src") && vid.readyState > 0) vid.currentTime = 0;
 }
 function stopStream() { if (S.es) { S.es.close(); S.es = null; } }

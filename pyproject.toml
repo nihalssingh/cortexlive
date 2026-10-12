@@ -1,6 +1,6 @@
 [project]
 name = "cortexlive"
-version = "0.1.0"
+version = "0.1.1"
 description = "Predict human cortical responses to any video, in real time, on a laptop"
 # The code. The trained model is CC BY-NC 4.0 and the atlas files have their own
 # licenses: see NOTICE.
@@ -25,7 +25,10 @@ cortexlive = "cortexlive.cli:main"
 
 [project.optional-dependencies]
 # Everything `cortexlive run` / `cortexlive view` need: the three backbones run locally.
-live = ["torch>=2.4", "transformers>=4.56", "huggingface-hub>=0.26"]
+# transformers 5.5 or later: up to 5.3, the last entry of V-JEPA2's hidden_states is
+# post-norm, so the truncated live encoder (cortexlive/stream.py) would read other features
+# than the cache.
+live = ["torch>=2.4", "transformers>=5.5", "huggingface-hub>=0.26"]
 # Head training on the laptop. Reads cached features only.
 train = ["torch>=2.4"]
 # Backbone extraction. Deliberately NOT a core dependency: if a training path ever

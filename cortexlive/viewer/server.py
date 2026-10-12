@@ -28,7 +28,7 @@ import traceback
 from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import numpy as np
 
@@ -208,6 +208,11 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
+            # no other page may frame the viewer (clickjacking)
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
+            if self.close_connection:
+                self.send_header("Connection", "close")
             self.end_headers()
             self.wfile.write(body)
 
@@ -222,6 +227,7 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
 
         def do_GET(self):
             if not self._allowed():
+                self.close_connection = True
                 return self._json({"error": "forbidden"}, 403)
             path = unquote(urlparse(self.path).path)
             if path in ("/", "/index.html"):
@@ -248,7 +254,10 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
                 key = ((d / "capture.json").stat().st_mtime, media is not None)
                 hit = payload_cache.get(str(d))
                 if hit is None or hit[0] != key:
-                    hit = (key, json.dumps(payload.capture_payload(d)).encode())
+                    # the id the page uses is the one this server knows it by (ext-1-... for a
+                    # capture opened from outside the captures folder), not the folder's name
+                    hit = (key, json.dumps({**payload.capture_payload(d), "id": m.group(1)})
+                           .encode())
                     payload_cache[str(d)] = hit
                     while len(payload_cache) > 4:
                         payload_cache.popitem(last=False)
@@ -263,6 +272,9 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
             return self._json({"error": "not found"}, 404)
 
         def do_POST(self):
+            # Every POST ends its connection: a refused POST's unread body must never be read
+            # as a further request, which would carry no Origin and pass the check below.
+            self.close_connection = True
             if not self._allowed(post=True):
                 return self._json({"error": "forbidden"}, 403)
             path = unquote(urlparse(self.path).path)
@@ -301,13 +313,17 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
             out = capture.new_dir(root, name)
             video = out / f"input{ext if ext in VIDEO_EXTS else '.video'}"
             left = length
-            with video.open("wb") as f:
-                while left > 0:
-                    chunk = self.rfile.read(min(1 << 20, left))
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    left -= len(chunk)
+            try:
+                with video.open("wb") as f:
+                    while left > 0:
+                        chunk = self.rfile.read(min(1 << 20, left))
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        left -= len(chunk)
+            except OSError:  # the connection was reset or the disk filled: keep nothing
+                shutil.rmtree(out, ignore_errors=True)
+                return
             if left > 0:  # the page went away mid-upload
                 shutil.rmtree(out, ignore_errors=True)
                 self.close_connection = True
@@ -348,6 +364,16 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
                 return
 
         def _file(self, path: Path) -> None:
+            # Only a video is served. A capture names its video (capture.media_path), and a
+            # capture made elsewhere could name any file, or link to one as input.mp4: the
+            # type comes from the file the path resolves to.
+            real = path.resolve()
+            own = real.name == "input.video"  # how _upload saves a video of an unlisted type
+            ctype = ("application/octet-stream" if own
+                     else "video/x-matroska" if real.suffix.lower() == ".mkv"
+                     else mimetypes.guess_type(real.name.lower())[0] or "")
+            if not (own or ctype.startswith("video/")) or not real.is_file():
+                return self._json({"error": "video not found"}, 404)
             size = path.stat().st_size
             start, end = 0, size - 1
             rng = self.headers.get("Range")
@@ -368,11 +394,6 @@ def make_handler(root: Path, live: Live, extra: dict[str, Path], port: int):
             self.send_response(206 if partial else 200)
             if partial:
                 self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
-            ctype = mimetypes.guess_type(path.name.lower())[0] or ""
-            if path.suffix.lower() == ".mkv":
-                ctype = "video/x-matroska"
-            if not ctype.startswith("video/"):
-                ctype = "application/octet-stream"
             self.send_header("Content-Type", ctype)
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Accept-Ranges", "bytes")
@@ -409,7 +430,7 @@ def serve(root: Path, port: int = 8765, open_capture: Path | None = None,
             target = cid
     live = Live(root)
     server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(root, live, extra, port))
-    url = f"http://localhost:{port}/" + (f"#capture={target}" if target else "")
+    url = f"http://localhost:{port}/" + (f"#capture={quote(target)}" if target else "")
     print(f"cortexlive viewer: {url}\n  drop a video onto the page to run it live; "
           "ctrl-c here to quit", flush=True)
     if browser:
